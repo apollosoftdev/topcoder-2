@@ -10,7 +10,8 @@
     "ghcr.io/devcontainers/features/node:1": {
       "version": "20"
     },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {}
   },
   "customizations": {
     "vscode": {
@@ -20,7 +21,8 @@
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "bradlc.vscode-tailwindcss",
-        "ms-azuretools.vscode-docker"
+        "ms-azuretools.vscode-docker",
+        "anthropics.claude-code"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
@@ -34,6 +36,12 @@
     }
   },
   "forwardPorts": [8000, 3000, 5432],
-  "postCreateCommand": "cd /workspace && pip install -r backend/requirements.txt && cd github-app && npm install",
-  "remoteUser": "vscode"
+  "postCreateCommand": "npm install -g @anthropic-ai/claude-code && cd /workspace && pip install -r backend/requirements.txt && cd github-app && npm install",
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached"
+  ],
+  "containerEnv": {
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
+  }
 }
