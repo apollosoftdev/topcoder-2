@@ -81,7 +81,8 @@ async def analyze_code(
             if high_count:
                 summary_parts.append(f"{high_count} high severity.")
 
-        if result.get("copilot_detection", {}).get("detected"):
+        copilot_detection = result.get("copilot_detection")
+        if copilot_detection and copilot_detection.detected:
             summary_parts.append("AI-generated code indicators detected.")
 
         # Convert violations to schema
