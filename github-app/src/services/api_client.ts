@@ -68,6 +68,20 @@ export interface CopilotDetection {
   indicators: string[];
 }
 
+export interface LicenseInfo {
+  count: number;
+  severity: string;
+  files: string[];
+}
+
+export interface LicenseSummary {
+  total_license_violations: number;
+  total_ip_violations: number;
+  licenses_found: Record<string, LicenseInfo>;
+  has_restricted_licenses: boolean;
+  has_copyleft_licenses: boolean;
+}
+
 export interface AnalysisResult {
   request_id: string;
   repository: string;
@@ -76,10 +90,32 @@ export interface AnalysisResult {
   violations: Violation[];
   ai_review?: AIReview;
   copilot_detection?: CopilotDetection;
+  license_summary?: LicenseSummary;
   enforcement_action: string;
   should_block: boolean;
+  ai_code_detected: boolean;
+  stricter_enforcement_applied: boolean;
   summary: string;
   analyzed_at: string;
+}
+
+export interface OverrideRequest {
+  repository: string;
+  pull_request_number: number;
+  request_id: string;
+  overridden_by: string;
+  reason: string;
+  violations_count: number;
+}
+
+export interface OverrideResult {
+  success: boolean;
+  override_id?: number;
+  message: string;
+  repository: string;
+  pull_request_number: number;
+  overridden_by: string;
+  created_at?: string;
 }
 
 export class ApiClient {
@@ -126,5 +162,51 @@ export class ApiClient {
     }
 
     return response.json() as Promise<{ status: string; version: string }>;
+  }
+
+  async requestOverride(request: OverrideRequest): Promise<OverrideResult> {
+    const url = `${this.baseUrl}/api/v1/override`;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (this.apiKey) {
+      headers['X-API-Key'] = this.apiKey;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Override request failed: ${response.status} ${error}`);
+    }
+
+    return response.json() as Promise<OverrideResult>;
+  }
+
+  async checkOverride(
+    repository: string,
+    pullRequestNumber: number
+  ): Promise<{ has_override: boolean; override?: unknown }> {
+    const url = `${this.baseUrl}/api/v1/override/${encodeURIComponent(repository)}/pr/${pullRequestNumber}`;
+
+    const headers: Record<string, string> = {};
+
+    if (this.apiKey) {
+      headers['X-API-Key'] = this.apiKey;
+    }
+
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      throw new Error(`Override check failed: ${response.status}`);
+    }
+
+    return response.json() as Promise<{ has_override: boolean; override?: unknown }>;
   }
 }

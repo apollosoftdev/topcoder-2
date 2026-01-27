@@ -1,0 +1,10 @@
+{
+  "pythonPath": "/usr/local/python/3.11.14/bin/python",
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "extraPaths": [
+    "/usr/local/python/3.11.14/lib/python3.11/site-packages"
+  ]
+}

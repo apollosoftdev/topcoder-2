@@ -1,0 +1,109 @@
+id: license
+name: License Compliance Rules
+description: Rules for detecting license violations and IP risks in code
+version: "1.0.0"
+enforcement_mode: warning
+
+metadata:
+  category: compliance
+  compliance: ["IP", "OSS"]
+
+rules:
+  - id: lic-agpl-detected
+    name: AGPL License Detected
+    description: Code licensed under AGPL requires source disclosure for network use
+    severity: critical
+    pattern: "(?:AGPL|GNU Affero General Public License)"
+    message: AGPL license detected - requires source code disclosure for network services
+    suggestion: Consult legal team before using AGPL code in proprietary applications
+    tags: [license, copyleft, agpl]
+
+  - id: lic-gpl3-detected
+    name: GPL-3.0 License Detected
+    description: Code licensed under GPL-3.0 has strong copyleft requirements
+    severity: high
+    pattern: "(?:GPL-3\\.0|GNU General Public License.*[Vv]ersion 3)"
+    message: GPL-3.0 license detected - strong copyleft license
+    suggestion: Ensure compliance with GPL-3.0 distribution requirements or use alternatives
+    tags: [license, copyleft, gpl]
+
+  - id: lic-gpl2-detected
+    name: GPL-2.0 License Detected
+    description: Code licensed under GPL-2.0 has copyleft requirements
+    severity: high
+    pattern: "(?:GPL-2\\.0|GNU General Public License.*[Vv]ersion 2)"
+    message: GPL-2.0 license detected - copyleft license
+    suggestion: Ensure compliance with GPL-2.0 distribution requirements
+    tags: [license, copyleft, gpl]
+
+  - id: lic-sspl-detected
+    name: SSPL License Detected
+    description: Server Side Public License requires service code disclosure
+    severity: critical
+    pattern: "SSPL|Server Side Public License"
+    message: SSPL license detected - requires disclosure of service code
+    suggestion: Do not use SSPL-licensed code in production services without legal review
+    tags: [license, copyleft, sspl]
+
+  - id: lic-lgpl-detected
+    name: LGPL License Detected
+    description: Code licensed under LGPL has weak copyleft requirements
+    severity: medium
+    pattern: "(?:LGPL|GNU Lesser General Public License)"
+    message: LGPL license detected - weak copyleft license
+    suggestion: LGPL is generally safe for dynamic linking, review usage context
+    tags: [license, copyleft, lgpl]
+
+  - id: lic-mpl-detected
+    name: MPL License Detected
+    description: Mozilla Public License has file-level copyleft requirements
+    severity: medium
+    pattern: "(?:MPL|Mozilla Public License)"
+    message: MPL license detected - file-level copyleft
+    suggestion: Modified MPL files must be disclosed, but can be combined with proprietary code
+    tags: [license, copyleft, mpl]
+
+  - id: lic-copyright-third-party
+    name: Third-Party Copyright Notice
+    description: Detects third-party copyright notices that may indicate licensed code
+    severity: medium
+    pattern: "Copyright\\s+(?:\\(c\\)|©)?\\s*\\d{4}(?:-\\d{4})?\\s+(?!Your Company|Your Name|<.*>|\\[.*\\])[\\w\\s,\\.]+"
+    message: Third-party copyright notice detected
+    suggestion: Verify you have rights to use this code and proper attribution is maintained
+    tags: [copyright, ip]
+
+  - id: lic-proprietary-marker
+    name: Proprietary Code Marker
+    description: Detects markers indicating proprietary or confidential code
+    severity: high
+    pattern: "(?:PROPRIETARY|CONFIDENTIAL|TRADE SECRET)"
+    message: Proprietary/confidential marker detected
+    suggestion: This code may be proprietary - verify you have authorization to use it
+    tags: [proprietary, ip]
+
+  - id: lic-usage-restriction
+    name: Usage Restriction Detected
+    description: Detects explicit usage restrictions in code
+    severity: high
+    pattern: "(?:DO NOT (?:COPY|DISTRIBUTE|MODIFY|SHARE))"
+    message: Usage restriction detected
+    suggestion: This code has explicit usage restrictions - review before including
+    tags: [restriction, ip]
+
+  - id: lic-spdx-identifier
+    name: SPDX License Identifier
+    description: Detects SPDX license identifiers for license tracking
+    severity: low
+    pattern: "SPDX-License-Identifier:\\s*\\S+"
+    message: SPDX license identifier found
+    suggestion: Review the license identifier to ensure compatibility with your project
+    tags: [license, spdx]
+
+  - id: lic-no-license
+    name: Code Without License
+    description: Detects code files that may be missing license information
+    severity: medium
+    pattern: "All rights reserved\\.?(?!.*(?:MIT|Apache|BSD|GPL|LGPL|MPL))"
+    message: "Copyright with 'All rights reserved' but no clear license"
+    suggestion: Code with 'All rights reserved' and no license may not be usable - verify permissions
+    tags: [license, missing]

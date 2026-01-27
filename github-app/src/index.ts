@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 
 import { handlePullRequest } from './webhooks/pull_request';
 import { handlePush } from './webhooks/push';
+import { handleIssueComment } from './webhooks/issue_comment';
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +31,7 @@ webhooks.on('pull_request.opened', handlePullRequest);
 webhooks.on('pull_request.synchronize', handlePullRequest);
 webhooks.on('pull_request.reopened', handlePullRequest);
 webhooks.on('push', handlePush);
+webhooks.on('issue_comment.created', handleIssueComment);
 
 // Error handler for webhooks
 webhooks.onError((error) => {

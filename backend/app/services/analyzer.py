@@ -9,9 +9,12 @@ from ..api.schemas import (
     AISecurityIssue,
     AnalysisConfig,
     CopilotDetection,
+    LicenseInfo,
+    LicenseSummary,
 )
 from ..rules.engine import RuleEngine
 from .ai_review import AIReviewer
+from .license_analyzer import LicenseAnalyzer
 from .static_analysis import StaticAnalyzer, Violation
 
 logger = logging.getLogger(__name__)
@@ -29,6 +32,7 @@ class CodeAnalyzer:
         self.rule_engine = rule_engine or RuleEngine()
         self.static_analyzer = StaticAnalyzer()
         self.ai_reviewer = AIReviewer()
+        self.license_analyzer = LicenseAnalyzer()
 
     async def analyze(
         self,
@@ -53,6 +57,7 @@ class CodeAnalyzer:
         violations: list[Violation] = []
         ai_review: Optional[AIReviewSchema] = None
         copilot_detection: Optional[CopilotDetection] = None
+        license_summary: Optional[LicenseSummary] = None
 
         # Load custom rules if provided
         if config.custom_rules:
@@ -139,10 +144,58 @@ class CodeAnalyzer:
             except Exception as e:
                 logger.error(f"Copilot detection failed: {e}")
 
+        # Run license analysis if license pack is enabled
+        if "license" in config.rule_packs:
+            try:
+                license_violations = self.license_analyzer.analyze_diff(diff)
+
+                # Convert license violations to standard Violation objects
+                for lv in license_violations:
+                    violation = Violation(
+                        type=lv.type,
+                        severity=lv.severity,
+                        rule=f"lic-{lv.type}-{lv.license_type or 'unknown'}".lower().replace(" ", "-"),
+                        file=lv.file,
+                        line=lv.line,
+                        column=0,
+                        message=lv.message,
+                        suggestion=lv.suggestion,
+                        code_snippet=lv.code_snippet,
+                        cwe=None,
+                        owasp=None,
+                    )
+                    violations.append(violation)
+
+                # Get license summary
+                summary_data = self.license_analyzer.get_license_summary(license_violations)
+                license_summary = LicenseSummary(
+                    total_license_violations=summary_data["total_license_violations"],
+                    total_ip_violations=summary_data["total_ip_violations"],
+                    licenses_found={
+                        k: LicenseInfo(
+                            count=v["count"],
+                            severity=v["severity"],
+                            files=v["files"],
+                        )
+                        for k, v in summary_data["licenses_found"].items()
+                    },
+                    has_restricted_licenses=summary_data["has_restricted_licenses"],
+                    has_copyleft_licenses=summary_data["has_copyleft_licenses"],
+                )
+
+                logger.info(
+                    f"License analysis found {len(license_violations)} violations "
+                    f"({summary_data['total_license_violations']} license, "
+                    f"{summary_data['total_ip_violations']} IP)"
+                )
+            except Exception as e:
+                logger.error(f"License analysis failed: {e}")
+
         return {
             "violations": violations,
             "ai_review": ai_review,
             "copilot_detection": copilot_detection,
+            "license_summary": license_summary,
             "enforcement_mode": enforcement_mode.value,
         }
 

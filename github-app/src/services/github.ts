@@ -224,4 +224,68 @@ export class GitHubService {
 
     return response.data.number;
   }
+
+  async getCollaboratorPermission(
+    owner: string,
+    repo: string,
+    username: string
+  ): Promise<boolean> {
+    try {
+      const response = await this.octokit.repos.getCollaboratorPermissionLevel({
+        owner,
+        repo,
+        username,
+      });
+
+      // Users with write, maintain, or admin permission can override
+      const allowedPermissions = ['write', 'maintain', 'admin'];
+      return allowedPermissions.includes(response.data.permission);
+    } catch (error) {
+      console.error(`Failed to get permission for ${username}:`, error);
+      return false;
+    }
+  }
+
+  async getPullRequest(
+    owner: string,
+    repo: string,
+    pullNumber: number
+  ): Promise<{
+    head: { sha: string };
+    base: { sha: string };
+    number: number;
+    state: string;
+  }> {
+    const response = await this.octokit.pulls.get({
+      owner,
+      repo,
+      pull_number: pullNumber,
+    });
+
+    return {
+      head: { sha: response.data.head.sha },
+      base: { sha: response.data.base.sha },
+      number: response.data.number,
+      state: response.data.state,
+    };
+  }
+
+  async getCheckRuns(
+    owner: string,
+    repo: string,
+    ref: string
+  ): Promise<Array<{ id: number; name: string; status: string; conclusion: string | null }>> {
+    const response = await this.octokit.checks.listForRef({
+      owner,
+      repo,
+      ref,
+    });
+
+    return response.data.check_runs.map((check) => ({
+      id: check.id,
+      name: check.name,
+      status: check.status,
+      conclusion: check.conclusion,
+    }));
+  }
 }

@@ -22,6 +22,14 @@ logger = logging.getLogger(__name__)
 Base = declarative_base()
 
 
+# Import override model to ensure it's registered with Base metadata
+# This is imported after Base is defined but before init_db is called
+def _register_override_model():
+    """Lazy import to avoid circular dependency."""
+    from .override import OverrideLog  # noqa: F401
+    return OverrideLog
+
+
 class AuditLog(Base):
     """Audit log table for tracking all analysis actions."""
 
@@ -80,6 +88,9 @@ async def get_async_session() -> AsyncSession:
 async def init_db():
     """Initialize the database tables."""
     try:
+        # Register override model to ensure its table is created
+        _register_override_model()
+
         engine = await get_async_engine()
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
