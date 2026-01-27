@@ -1,0 +1,34 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+# Backend service configuration
+[[services]]
+name = "backend"
+source = "./backend"
+[services.build]
+builder = "dockerfile"
+dockerfile = "Dockerfile"
+[services.deploy]
+healthcheckPath = "/health"
+port = 8000
+[services.env]
+LOG_LEVEL = "INFO"
+
+# GitHub App service configuration
+[[services]]
+name = "github-app"
+source = "./github-app"
+[services.build]
+builder = "dockerfile"
+dockerfile = "Dockerfile"
+[services.deploy]
+healthcheckPath = "/health"
+port = 3000
+[services.env]
+NODE_ENV = "production"
