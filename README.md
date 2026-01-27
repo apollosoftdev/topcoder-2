@@ -301,6 +301,58 @@ The system supports multiple AI providers for code review. Configure via the `AI
 
 Each provider requires its respective API key to be set.
 
+## License & IP Compliance
+
+The system includes built-in license and intellectual property compliance analysis to help organizations manage open source risk.
+
+### License Detection
+
+Automatically detects and categorizes licenses in code changes:
+
+| Category | Licenses | Severity | Action |
+|----------|----------|----------|--------|
+| **Restricted** | AGPL-3.0, GPL-3.0, SSPL-1.0 | Critical/High | Requires legal review before use |
+| **Copyleft** | GPL-2.0, LGPL-2.1, LGPL-3.0, MPL-2.0, EPL-2.0 | Medium/High | Review distribution requirements |
+| **Permissive** | MIT, Apache-2.0, BSD, ISC, Unlicense, CC0 | Low | Generally safe for commercial use |
+
+Detection methods:
+- SPDX license identifiers (`SPDX-License-Identifier: MIT`)
+- License headers in source files
+- License file references
+- Full license name patterns
+
+### IP Protection
+
+Detects potential intellectual property issues:
+
+| Pattern | Severity | Description |
+|---------|----------|-------------|
+| Third-party copyright | Medium | Copyright notices from external sources |
+| Proprietary markers | High | `PROPRIETARY`, `CONFIDENTIAL`, `TRADE SECRET` |
+| Usage restrictions | High | `DO NOT COPY`, `DO NOT DISTRIBUTE`, etc. |
+
+### Response Format
+
+License analysis is included in the analysis response:
+
+```json
+{
+  "license_summary": {
+    "total_license_violations": 2,
+    "total_ip_violations": 1,
+    "licenses_found": {
+      "GPL-3.0": {
+        "count": 1,
+        "severity": "high",
+        "files": ["lib/utils.py"]
+      }
+    },
+    "has_restricted_licenses": false,
+    "has_copyleft_licenses": true
+  }
+}
+```
+
 ## Rule Packs
 
 ### Security (Default)
