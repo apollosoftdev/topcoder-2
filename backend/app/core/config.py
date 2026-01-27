@@ -28,8 +28,19 @@ class Settings(BaseSettings):
     # Application
     app_name: str = "Enterprise Guardrails API"
     app_version: str = "1.0.0"
+    env: str = "development"  # development, staging, production
     debug: bool = False
     log_level: str = "INFO"
+
+    @property
+    def is_production(self) -> bool:
+        """Check if running in production environment."""
+        return self.env.lower() == "production"
+
+    @property
+    def is_development(self) -> bool:
+        """Check if running in development environment."""
+        return self.env.lower() == "development"
 
     # API Keys
     anthropic_api_key: str = ""
@@ -70,6 +81,7 @@ def get_settings() -> Settings:
 
     # Log loaded configuration (mask sensitive values)
     logger.info("Configuration loaded:")
+    logger.info(f"  ENV: {settings.env}")
     logger.info(f"  DATABASE_URL: {settings.database_url[:30]}...")
     logger.info(f"  AI_PROVIDER: {settings.ai_provider}")
     logger.info(f"  ANTHROPIC_API_KEY: {'[SET]' if settings.anthropic_api_key else '[NOT SET]'}")

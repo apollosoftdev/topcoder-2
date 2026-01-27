@@ -35,7 +35,7 @@ def get_cors_origins() -> list[str]:
         return origins
 
     # Default development origins - warn in production
-    if not settings.debug:
+    if settings.is_production:
         logger.warning(
             "CORS_ORIGINS not configured - using permissive defaults. "
             "Set CORS_ORIGINS environment variable in production."
