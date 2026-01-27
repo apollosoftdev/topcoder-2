@@ -1,5 +1,6 @@
 """AI integration for intelligent code review. Supports Anthropic Claude, Google Gemini, and Groq."""
 
+import asyncio
 import json
 import logging
 import re
@@ -214,33 +215,45 @@ class AIReviewer:
 
     async def _review_anthropic(self, prompt: str) -> str:
         """Perform review using Anthropic Claude."""
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=self.max_tokens,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return response.content[0].text
+        # Anthropic SDK is synchronous, wrap in thread to avoid blocking event loop
+        def _call_anthropic():
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                system=SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return response.content[0].text
+
+        return await asyncio.to_thread(_call_anthropic)
 
     async def _review_gemini(self, prompt: str) -> str:
         """Perform review using Google Gemini."""
-        response = self.client.models.generate_content(
-            model=self.model,
-            contents=f"{SYSTEM_PROMPT}\n\n{prompt}",
-        )
-        return response.text
+        # Gemini SDK is synchronous, wrap in thread to avoid blocking event loop
+        def _call_gemini():
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=f"{SYSTEM_PROMPT}\n\n{prompt}",
+            )
+            return response.text
+
+        return await asyncio.to_thread(_call_gemini)
 
     async def _review_groq(self, prompt: str) -> str:
         """Perform review using Groq."""
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt},
-            ],
-            max_tokens=4096,
-        )
-        return response.choices[0].message.content
+        # Groq SDK is synchronous, wrap in thread to avoid blocking event loop
+        def _call_groq():
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=4096,
+            )
+            return response.choices[0].message.content
+
+        return await asyncio.to_thread(_call_groq)
 
     def _parse_response(self, content: str) -> AIReviewResult:
         """Parse AI response into structured result."""
