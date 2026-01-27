@@ -1,0 +1,30 @@
+{
+  "name": "enterprise-guardrails",
+  "version": "1.0.0",
+  "description": "AI-powered enterprise guardrails for GitHub Copilot",
+  "private": true,
+  "workspaces": [
+    "github-app"
+  ],
+  "scripts": {
+    "install:all": "npm install && cd backend && pip install -r requirements.txt",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:github-app\"",
+    "dev:backend": "cd backend && uvicorn app.main:app --reload --port 8000",
+    "dev:github-app": "cd github-app && npm run dev",
+    "build": "cd github-app && npm run build",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:github-app\"",
+    "start:backend": "cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000",
+    "start:github-app": "cd github-app && npm start",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "typecheck": "cd github-app && npm run typecheck",
+    "lint": "cd github-app && npm run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

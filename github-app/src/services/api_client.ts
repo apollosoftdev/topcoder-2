@@ -113,7 +113,7 @@ export class ApiClient {
       throw new Error(`API request failed: ${response.status} ${error}`);
     }
 
-    return response.json();
+    return response.json() as Promise<AnalysisResult>;
   }
 
   async getHealth(): Promise<{ status: string; version: string }> {
@@ -125,6 +125,6 @@ export class ApiClient {
       throw new Error(`Health check failed: ${response.status}`);
     }
 
-    return response.json();
+    return response.json() as Promise<{ status: string; version: string }>;
   }
 }
