@@ -364,6 +364,100 @@ if ai:
 fi
 
 # ===========================================
+# Webhook Signature Verification Test
+# ===========================================
+log_section "8. Webhook Signature Verification Test"
+
+if [ "$BACKEND_HEALTH" != "200" ]; then
+    log_warn "Skipping webhook signature tests - backend not running"
+else
+    log_info "Testing webhook signature verification logic..."
+
+    # Test the signature verification function
+    WEBHOOK_TEST=$(python3 -c "
+import hmac
+import hashlib
+import sys
+sys.path.insert(0, '.')
+from app.core.security import verify_github_webhook_signature
+
+# Test valid signature
+secret = 'test-secret'
+payload = b'{\"test\": \"payload\"}'
+signature = 'sha256=' + hmac.new(secret.encode('utf-8'), payload, hashlib.sha256).hexdigest()
+
+if verify_github_webhook_signature(payload, signature, secret):
+    print('PASS_VALID')
+else:
+    print('FAIL_VALID')
+
+# Test invalid signature
+if not verify_github_webhook_signature(payload, 'sha256=invalid', secret):
+    print('PASS_INVALID')
+else:
+    print('FAIL_INVALID')
+
+# Test missing signature prefix
+if not verify_github_webhook_signature(payload, 'invalid', secret):
+    print('PASS_PREFIX')
+else:
+    print('FAIL_PREFIX')
+" 2>&1)
+
+    if echo "$WEBHOOK_TEST" | grep -q "PASS_VALID"; then
+        log_success "Valid webhook signatures accepted"
+    else
+        log_fail "Valid webhook signatures rejected"
+    fi
+
+    if echo "$WEBHOOK_TEST" | grep -q "PASS_INVALID"; then
+        log_success "Invalid webhook signatures rejected"
+    else
+        log_fail "Invalid webhook signatures accepted (security issue!)"
+    fi
+
+    if echo "$WEBHOOK_TEST" | grep -q "PASS_PREFIX"; then
+        log_success "Missing sha256= prefix signatures rejected"
+    else
+        log_fail "Missing sha256= prefix signatures accepted (security issue!)"
+    fi
+fi
+
+# ===========================================
+# Configuration Validation Test
+# ===========================================
+log_section "9. Configuration Validation Test"
+
+log_info "Testing configuration loading..."
+
+CONFIG_TEST=$(python3 -c "
+import sys
+sys.path.insert(0, '.')
+from app.core.config import get_settings
+
+try:
+    settings = get_settings()
+    print('OK')
+    print(f'Provider: {settings.ai_provider}')
+    print(f'DB URL set: {bool(settings.database_url)}')
+    print(f'Debug mode: {settings.debug}')
+except Exception as e:
+    print('FAIL')
+    print(str(e)[:100])
+" 2>&1)
+
+CONFIG_STATUS=$(echo "$CONFIG_TEST" | head -1)
+if [ "$CONFIG_STATUS" = "OK" ]; then
+    log_success "Configuration loaded successfully"
+    echo "$CONFIG_TEST" | tail -n +2 | while read line; do
+        echo "         $line"
+    done
+else
+    log_fail "Configuration loading failed"
+    echo "         $(echo "$CONFIG_TEST" | tail -1)"
+fi
+
+# ===========================================
 # Summary
 # ===========================================
 log_section "Test Summary"
@@ -375,6 +469,14 @@ echo -e "  ${RED}Failed:${NC} $FAILED"
 echo -e "  Total:  $TOTAL"
 echo ""
 
+# Log test results to file for CI/CD integration
+LOG_FILE="test-results.log"
+echo "Test run: $(date)" > "$LOG_FILE"
+echo "Passed: $PASSED" >> "$LOG_FILE"
+echo "Failed: $FAILED" >> "$LOG_FILE"
+echo "Total: $TOTAL" >> "$LOG_FILE"
+log_info "Test results saved to $LOG_FILE"
+
 if [ "$FAILED" -eq 0 ]; then
     echo -e "${GREEN}All tests passed! Your setup is complete.${NC}"
     echo ""
@@ -385,5 +487,10 @@ if [ "$FAILED" -eq 0 ]; then
     exit 0
 else
     echo -e "${YELLOW}Some tests failed. Check the output above.${NC}"
+    echo ""
+    echo "Common issues:"
+    echo "  - Database not running: docker-compose up -d postgres"
+    echo "  - Backend not running: npm run dev"
+    echo "  - Missing API keys: Check .env file"
     exit 1
 fi
