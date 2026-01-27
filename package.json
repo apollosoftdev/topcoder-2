@@ -2,7 +2,9 @@
   "name": "enterprise-guardrails",
   "version": "1.0.0",
   "description": "AI-powered enterprise guardrails for GitHub Copilot",
-  "private": true,
+  "private": false,
+  "author": "apollosoftdev",
+  "license": "MIT",
   "workspaces": [
     "github-app"
   ],

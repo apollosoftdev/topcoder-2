@@ -2,11 +2,14 @@ FROM node:20-slim
 
 WORKDIR /app
 
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (including devDependencies for build)
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -14,9 +17,12 @@ COPY . .
 # Build TypeScript
 RUN npm run build
 
-# Create non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
+# Remove devDependencies after build
+RUN npm prune --production
+
+# Use existing node user (UID 1000)
+RUN chown -R node:node /app
+USER node
 
 # Expose port
 EXPOSE 3000
