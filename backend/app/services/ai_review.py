@@ -1,10 +1,10 @@
-"""Claude AI integration for intelligent code review."""
+"""AI integration for intelligent code review. Supports Anthropic Claude, Google Gemini, and Groq."""
 
+import json
 import logging
+import re
 from dataclasses import dataclass
 from typing import Optional
-
-from anthropic import Anthropic
 
 from ..core.config import get_settings
 
@@ -102,20 +102,65 @@ Return ONLY valid JSON, no markdown formatting or explanation outside the JSON.
 
 
 class AIReviewer:
-    """Claude AI-powered code reviewer."""
+    """AI-powered code reviewer. Supports Anthropic Claude, Google Gemini, and Groq."""
 
-    def __init__(self, api_key: Optional[str] = None):
-        """Initialize the AI reviewer."""
-        settings = get_settings()
-        self.api_key = api_key or settings.anthropic_api_key
-        self.model = settings.claude_model
-        self.max_tokens = settings.claude_max_tokens
+    def __init__(self):
+        """Initialize the AI reviewer based on configured provider."""
+        self.settings = get_settings()
+        self.provider = self.settings.ai_provider.lower()
+        self.client = None
 
-        if not self.api_key:
-            logger.warning("No Anthropic API key configured - AI review disabled")
-            self.client = None
+        if self.provider == "anthropic":
+            self._init_anthropic()
+        elif self.provider == "gemini":
+            self._init_gemini()
+        elif self.provider == "groq":
+            self._init_groq()
         else:
-            self.client = Anthropic(api_key=self.api_key)
+            logger.warning(f"Unknown AI provider: {self.provider} - AI review disabled")
+
+    def _init_anthropic(self):
+        """Initialize Anthropic Claude client."""
+        if not self.settings.anthropic_api_key:
+            logger.warning("No Anthropic API key configured - AI review disabled")
+            return
+
+        try:
+            from anthropic import Anthropic
+            self.client = Anthropic(api_key=self.settings.anthropic_api_key)
+            self.model = self.settings.claude_model
+            self.max_tokens = self.settings.claude_max_tokens
+            logger.info(f"Anthropic Claude initialized with model: {self.model}")
+        except Exception as e:
+            logger.error(f"Failed to initialize Anthropic client: {e}")
+
+    def _init_gemini(self):
+        """Initialize Google Gemini client."""
+        if not self.settings.google_api_key:
+            logger.warning("No Google API key configured - AI review disabled")
+            return
+
+        try:
+            from google import genai
+            self.client = genai.Client(api_key=self.settings.google_api_key)
+            self.model = self.settings.gemini_model
+            logger.info(f"Google Gemini initialized with model: {self.model}")
+        except Exception as e:
+            logger.error(f"Failed to initialize Gemini client: {e}")
+
+    def _init_groq(self):
+        """Initialize Groq client."""
+        if not self.settings.groq_api_key:
+            logger.warning("No Groq API key configured - AI review disabled")
+            return
+
+        try:
+            from groq import Groq
+            self.client = Groq(api_key=self.settings.groq_api_key)
+            self.model = self.settings.groq_model
+            logger.info(f"Groq initialized with model: {self.model}")
+        except Exception as e:
+            logger.error(f"Failed to initialize Groq client: {e}")
 
     async def review(
         self,
@@ -140,9 +185,8 @@ class AIReviewer:
             return None
 
         # Truncate diff if too large
-        settings = get_settings()
-        if len(diff) > settings.max_diff_size:
-            diff = diff[: settings.max_diff_size] + "\n... (truncated)"
+        if len(diff) > self.settings.max_diff_size:
+            diff = diff[: self.settings.max_diff_size] + "\n... (truncated)"
             logger.warning("Diff truncated due to size")
 
         prompt = REVIEW_PROMPT_TEMPLATE.format(
@@ -153,26 +197,53 @@ class AIReviewer:
         )
 
         try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=self.max_tokens,
-                system=SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": prompt}],
-            )
+            if self.provider == "anthropic":
+                content = await self._review_anthropic(prompt)
+            elif self.provider == "gemini":
+                content = await self._review_gemini(prompt)
+            elif self.provider == "groq":
+                content = await self._review_groq(prompt)
+            else:
+                return None
 
-            # Parse the response
-            content = response.content[0].text
             return self._parse_response(content)
 
         except Exception as e:
             logger.error(f"AI review failed: {e}")
             return None
 
-    def _parse_response(self, content: str) -> AIReviewResult:
-        """Parse Claude's response into structured result."""
-        import json
+    async def _review_anthropic(self, prompt: str) -> str:
+        """Perform review using Anthropic Claude."""
+        response = self.client.messages.create(
+            model=self.model,
+            max_tokens=self.max_tokens,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return response.content[0].text
 
-        # Try to extract JSON from the response
+    async def _review_gemini(self, prompt: str) -> str:
+        """Perform review using Google Gemini."""
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=f"{SYSTEM_PROMPT}\n\n{prompt}",
+        )
+        return response.text
+
+    async def _review_groq(self, prompt: str) -> str:
+        """Perform review using Groq."""
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=4096,
+        )
+        return response.choices[0].message.content
+
+    def _parse_response(self, content: str) -> AIReviewResult:
+        """Parse AI response into structured result."""
         try:
             # Handle potential markdown code blocks
             if "```json" in content:
@@ -193,7 +264,6 @@ class AIReviewer:
 
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse AI response: {e}")
-            # Return a basic result with the raw summary
             return AIReviewResult(
                 summary=content[:500] if content else "Failed to parse AI response",
                 security_issues=[],
@@ -239,8 +309,6 @@ class AIReviewer:
                 "Boilerplate documentation",
             ),
         ]
-
-        import re
 
         for pattern, description in ai_patterns:
             if re.search(pattern, diff, re.IGNORECASE):

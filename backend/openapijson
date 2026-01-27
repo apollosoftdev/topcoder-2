@@ -1,0 +1,2172 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Enterprise Guardrails API",
+        "description": "AI-powered enterprise guardrails for GitHub Copilot code review",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/analyze": {
+            "post": {
+                "summary": "Analyze code for violations",
+                "description": "Analyze code diff for security violations, quality issues, and AI-generated code markers",
+                "operationId": "analyze_code_api_v1_analyze_post",
+                "parameters": [
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnalyzeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AnalyzeResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/audit-logs": {
+            "get": {
+                "summary": "Get audit logs",
+                "description": "Retrieve audit logs with optional filtering",
+                "operationId": "get_audit_logs_api_v1_audit_logs_get",
+                "parameters": [
+                    {
+                        "name": "repository",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter by repository",
+                            "title": "Repository"
+                        },
+                        "description": "Filter by repository"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "Page number",
+                            "default": 1,
+                            "title": "Page"
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Items per page",
+                            "default": 50,
+                            "title": "Page Size"
+                        },
+                        "description": "Items per page"
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuditLogResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rule-packs": {
+            "get": {
+                "summary": "List available rule packs",
+                "description": "Get information about all available rule packs",
+                "operationId": "list_rule_packs_api_v1_rule_packs_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RulePacksResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/health": {
+            "get": {
+                "summary": "Health check",
+                "description": "Check the health status of the service",
+                "operationId": "health_check_api_v1_health_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HealthResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/summary": {
+            "get": {
+                "summary": "Get summary statistics",
+                "description": "Get aggregated statistics for the dashboard",
+                "operationId": "get_stats_summary_api_v1_stats_summary_get",
+                "parameters": [
+                    {
+                        "name": "days",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 365,
+                            "minimum": 1,
+                            "description": "Number of days to include",
+                            "default": 30,
+                            "title": "Days"
+                        },
+                        "description": "Number of days to include"
+                    },
+                    {
+                        "name": "repository",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter by repository",
+                            "title": "Repository"
+                        },
+                        "description": "Filter by repository"
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SummaryStats"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/trends": {
+            "get": {
+                "summary": "Get trend data",
+                "description": "Get trend data over time for charts",
+                "operationId": "get_stats_trends_api_v1_stats_trends_get",
+                "parameters": [
+                    {
+                        "name": "interval",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Time interval (day, week, month)",
+                            "default": "day",
+                            "title": "Interval"
+                        },
+                        "description": "Time interval (day, week, month)"
+                    },
+                    {
+                        "name": "periods",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 365,
+                            "minimum": 1,
+                            "description": "Number of periods",
+                            "default": 30,
+                            "title": "Periods"
+                        },
+                        "description": "Number of periods"
+                    },
+                    {
+                        "name": "repository",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter by repository",
+                            "title": "Repository"
+                        },
+                        "description": "Filter by repository"
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TrendsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/violations": {
+            "get": {
+                "summary": "Get violation breakdown",
+                "description": "Get violation statistics grouped by category",
+                "operationId": "get_violation_breakdown_api_v1_stats_violations_get",
+                "parameters": [
+                    {
+                        "name": "group_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Field to group by (severity, repository, enforcement_mode)",
+                            "default": "severity",
+                            "title": "Group By"
+                        },
+                        "description": "Field to group by (severity, repository, enforcement_mode)"
+                    },
+                    {
+                        "name": "days",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 365,
+                            "minimum": 1,
+                            "description": "Number of days to include",
+                            "default": 30,
+                            "title": "Days"
+                        },
+                        "description": "Number of days to include"
+                    },
+                    {
+                        "name": "repository",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter by repository",
+                            "title": "Repository"
+                        },
+                        "description": "Filter by repository"
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ViolationBreakdownResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/repositories": {
+            "get": {
+                "summary": "Get repository statistics",
+                "description": "Get statistics per repository",
+                "operationId": "get_repository_stats_api_v1_stats_repositories_get",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Maximum repositories to return",
+                            "default": 20,
+                            "title": "Limit"
+                        },
+                        "description": "Maximum repositories to return"
+                    },
+                    {
+                        "name": "days",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 365,
+                            "minimum": 1,
+                            "description": "Number of days to include",
+                            "default": 30,
+                            "title": "Days"
+                        },
+                        "description": "Number of days to include"
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RepositoryStatsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/override": {
+            "post": {
+                "summary": "Override a blocking decision",
+                "description": "Allow authorized users to override a blocking decision on a PR",
+                "operationId": "create_override_api_v1_override_post",
+                "parameters": [
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OverrideRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OverrideResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/override/{repository}/pr/{pull_request_number}": {
+            "get": {
+                "summary": "Check if override exists",
+                "description": "Check if an override exists for a specific PR",
+                "operationId": "check_override_api_v1_override__repository__pr__pull_request_number__get",
+                "parameters": [
+                    {
+                        "name": "repository",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Repository"
+                        }
+                    },
+                    {
+                        "name": "pull_request_number",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Pull Request Number"
+                        }
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OverrideCheckResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/overrides": {
+            "get": {
+                "summary": "Get override logs",
+                "description": "Retrieve override logs with optional filtering",
+                "operationId": "get_override_logs_api_v1_overrides_get",
+                "parameters": [
+                    {
+                        "name": "repository",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter by repository",
+                            "title": "Repository"
+                        },
+                        "description": "Filter by repository"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "Page number",
+                            "default": 1,
+                            "title": "Page"
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Items per page",
+                            "default": 50,
+                            "title": "Page Size"
+                        },
+                        "description": "Items per page"
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OverrideLogsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/": {
+            "get": {
+                "summary": "Root",
+                "description": "Root endpoint.",
+                "operationId": "root__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "summary": "Health Check",
+                "description": "Health check endpoint.",
+                "operationId": "health_check_health_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AICodeQualityIssue": {
+                "properties": {
+                    "severity": {
+                        "type": "string",
+                        "title": "Severity"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    },
+                    "file": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "File"
+                    },
+                    "line": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Line"
+                    },
+                    "recommendation": {
+                        "type": "string",
+                        "title": "Recommendation"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "severity",
+                    "title",
+                    "description",
+                    "recommendation"
+                ],
+                "title": "AICodeQualityIssue",
+                "description": "Code quality issue identified by AI review."
+            },
+            "AIReviewSchema": {
+                "properties": {
+                    "summary": {
+                        "type": "string",
+                        "title": "Summary"
+                    },
+                    "security_issues": {
+                        "items": {
+                            "$ref": "#/components/schemas/AISecurityIssue"
+                        },
+                        "type": "array",
+                        "title": "Security Issues",
+                        "default": []
+                    },
+                    "code_quality_issues": {
+                        "items": {
+                            "$ref": "#/components/schemas/AICodeQualityIssue"
+                        },
+                        "type": "array",
+                        "title": "Code Quality Issues",
+                        "default": []
+                    },
+                    "recommendations": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Recommendations",
+                        "default": []
+                    },
+                    "copilot_indicators": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Copilot Indicators",
+                        "default": []
+                    },
+                    "risk_score": {
+                        "type": "integer",
+                        "maximum": 100.0,
+                        "minimum": 0.0,
+                        "title": "Risk Score",
+                        "default": 0
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "summary"
+                ],
+                "title": "AIReviewSchema",
+                "description": "AI review results."
+            },
+            "AISecurityIssue": {
+                "properties": {
+                    "severity": {
+                        "type": "string",
+                        "title": "Severity"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    },
+                    "file": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "File"
+                    },
+                    "line": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Line"
+                    },
+                    "cwe": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cwe"
+                    },
+                    "owasp": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Owasp"
+                    },
+                    "recommendation": {
+                        "type": "string",
+                        "title": "Recommendation"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "severity",
+                    "title",
+                    "description",
+                    "recommendation"
+                ],
+                "title": "AISecurityIssue",
+                "description": "Security issue identified by AI review."
+            },
+            "AnalysisConfig": {
+                "properties": {
+                    "enforcement_mode": {
+                        "$ref": "#/components/schemas/EnforcementMode",
+                        "default": "warning"
+                    },
+                    "rule_packs": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Rule Packs",
+                        "default": [
+                            "security"
+                        ]
+                    },
+                    "custom_rules": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Custom Rules"
+                    },
+                    "ai_review_enabled": {
+                        "type": "boolean",
+                        "title": "Ai Review Enabled",
+                        "default": true
+                    },
+                    "copilot_detection_enabled": {
+                        "type": "boolean",
+                        "title": "Copilot Detection Enabled",
+                        "default": true
+                    },
+                    "copilot_enforcement": {
+                        "$ref": "#/components/schemas/CopilotEnforcementConfig"
+                    }
+                },
+                "type": "object",
+                "title": "AnalysisConfig",
+                "description": "Configuration for code analysis."
+            },
+            "AnalyzeRequest": {
+                "properties": {
+                    "repository": {
+                        "type": "string",
+                        "title": "Repository",
+                        "description": "Repository name (owner/repo)"
+                    },
+                    "pull_request_number": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pull Request Number",
+                        "description": "PR number if applicable"
+                    },
+                    "commit_sha": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Commit Sha",
+                        "description": "Commit SHA being analyzed"
+                    },
+                    "diff": {
+                        "type": "string",
+                        "title": "Diff",
+                        "description": "Git diff content to analyze"
+                    },
+                    "files": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Files",
+                        "description": "List of files in the diff",
+                        "default": []
+                    },
+                    "config": {
+                        "$ref": "#/components/schemas/AnalysisConfig"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "repository",
+                    "diff"
+                ],
+                "title": "AnalyzeRequest",
+                "description": "Request to analyze code changes."
+            },
+            "AnalyzeResponse": {
+                "properties": {
+                    "request_id": {
+                        "type": "string",
+                        "title": "Request Id"
+                    },
+                    "repository": {
+                        "type": "string",
+                        "title": "Repository"
+                    },
+                    "pull_request_number": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pull Request Number"
+                    },
+                    "commit_sha": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Commit Sha"
+                    },
+                    "violations": {
+                        "items": {
+                            "$ref": "#/components/schemas/ViolationSchema"
+                        },
+                        "type": "array",
+                        "title": "Violations",
+                        "default": []
+                    },
+                    "ai_review": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AIReviewSchema"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "copilot_detection": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CopilotDetection"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "license_summary": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/LicenseSummary"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "enforcement_action": {
+                        "$ref": "#/components/schemas/EnforcementMode"
+                    },
+                    "should_block": {
+                        "type": "boolean",
+                        "title": "Should Block",
+                        "description": "Whether to block merge",
+                        "default": false
+                    },
+                    "ai_code_detected": {
+                        "type": "boolean",
+                        "title": "Ai Code Detected",
+                        "description": "Whether AI-generated code was detected with high confidence",
+                        "default": false
+                    },
+                    "stricter_enforcement_applied": {
+                        "type": "boolean",
+                        "title": "Stricter Enforcement Applied",
+                        "description": "Whether stricter enforcement was applied due to AI code",
+                        "default": false
+                    },
+                    "summary": {
+                        "type": "string",
+                        "title": "Summary",
+                        "description": "Summary of findings",
+                        "default": ""
+                    },
+                    "analyzed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Analyzed At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "request_id",
+                    "repository",
+                    "enforcement_action"
+                ],
+                "title": "AnalyzeResponse",
+                "description": "Response from code analysis."
+            },
+            "AuditLogEntry": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Timestamp"
+                    },
+                    "repository": {
+                        "type": "string",
+                        "title": "Repository"
+                    },
+                    "pull_request_number": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pull Request Number"
+                    },
+                    "commit_sha": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Commit Sha"
+                    },
+                    "action": {
+                        "type": "string",
+                        "title": "Action"
+                    },
+                    "enforcement_mode": {
+                        "type": "string",
+                        "title": "Enforcement Mode"
+                    },
+                    "violations_count": {
+                        "type": "integer",
+                        "title": "Violations Count"
+                    },
+                    "critical_count": {
+                        "type": "integer",
+                        "title": "Critical Count"
+                    },
+                    "high_count": {
+                        "type": "integer",
+                        "title": "High Count"
+                    },
+                    "blocked": {
+                        "type": "boolean",
+                        "title": "Blocked"
+                    },
+                    "user": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "User"
+                    },
+                    "metadata": {
+                        "additionalProperties": true,
+                        "type": "object",
+                        "title": "Metadata",
+                        "default": {}
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "timestamp",
+                    "repository",
+                    "action",
+                    "enforcement_mode",
+                    "violations_count",
+                    "critical_count",
+                    "high_count",
+                    "blocked"
+                ],
+                "title": "AuditLogEntry",
+                "description": "Audit log entry schema."
+            },
+            "AuditLogResponse": {
+                "properties": {
+                    "entries": {
+                        "items": {
+                            "$ref": "#/components/schemas/AuditLogEntry"
+                        },
+                        "type": "array",
+                        "title": "Entries"
+                    },
+                    "total": {
+                        "type": "integer",
+                        "title": "Total"
+                    },
+                    "page": {
+                        "type": "integer",
+                        "title": "Page"
+                    },
+                    "page_size": {
+                        "type": "integer",
+                        "title": "Page Size"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "entries",
+                    "total",
+                    "page",
+                    "page_size"
+                ],
+                "title": "AuditLogResponse",
+                "description": "Response for audit log queries."
+            },
+            "CopilotDetection": {
+                "properties": {
+                    "detected": {
+                        "type": "boolean",
+                        "title": "Detected"
+                    },
+                    "confidence": {
+                        "type": "integer",
+                        "maximum": 100.0,
+                        "minimum": 0.0,
+                        "title": "Confidence",
+                        "default": 0
+                    },
+                    "indicators": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Indicators",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "detected"
+                ],
+                "title": "CopilotDetection",
+                "description": "Copilot/AI-generated code detection results."
+            },
+            "CopilotEnforcementConfig": {
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "title": "Enabled",
+                        "default": true
+                    },
+                    "escalate_medium_to_high": {
+                        "type": "boolean",
+                        "title": "Escalate Medium To High",
+                        "default": true
+                    },
+                    "block_on_medium": {
+                        "type": "boolean",
+                        "title": "Block On Medium",
+                        "default": true
+                    },
+                    "confidence_threshold": {
+                        "type": "integer",
+                        "maximum": 100.0,
+                        "minimum": 0.0,
+                        "title": "Confidence Threshold",
+                        "default": 60
+                    }
+                },
+                "type": "object",
+                "title": "CopilotEnforcementConfig",
+                "description": "Configuration for stricter enforcement on AI-generated code."
+            },
+            "EnforcementMode": {
+                "type": "string",
+                "enum": [
+                    "advisory",
+                    "warning",
+                    "blocking"
+                ],
+                "title": "EnforcementMode",
+                "description": "Policy enforcement modes."
+            },
+            "ErrorResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "title": "Error"
+                    },
+                    "detail": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Detail"
+                    },
+                    "code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Code"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "error"
+                ],
+                "title": "ErrorResponse",
+                "description": "Error response schema."
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "HealthResponse": {
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "title": "Status",
+                        "default": "healthy"
+                    },
+                    "version": {
+                        "type": "string",
+                        "title": "Version"
+                    },
+                    "database": {
+                        "type": "string",
+                        "title": "Database",
+                        "default": "connected"
+                    },
+                    "ai_service": {
+                        "type": "string",
+                        "title": "Ai Service",
+                        "default": "available"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "version"
+                ],
+                "title": "HealthResponse",
+                "description": "Health check response."
+            },
+            "LicenseInfo": {
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "title": "Count"
+                    },
+                    "severity": {
+                        "type": "string",
+                        "title": "Severity"
+                    },
+                    "files": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Files"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "count",
+                    "severity",
+                    "files"
+                ],
+                "title": "LicenseInfo",
+                "description": "Information about a detected license."
+            },
+            "LicenseSummary": {
+                "properties": {
+                    "total_license_violations": {
+                        "type": "integer",
+                        "title": "Total License Violations",
+                        "default": 0
+                    },
+                    "total_ip_violations": {
+                        "type": "integer",
+                        "title": "Total Ip Violations",
+                        "default": 0
+                    },
+                    "licenses_found": {
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/LicenseInfo"
+                        },
+                        "type": "object",
+                        "title": "Licenses Found",
+                        "default": {}
+                    },
+                    "has_restricted_licenses": {
+                        "type": "boolean",
+                        "title": "Has Restricted Licenses",
+                        "default": false
+                    },
+                    "has_copyleft_licenses": {
+                        "type": "boolean",
+                        "title": "Has Copyleft Licenses",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "title": "LicenseSummary",
+                "description": "Summary of license and IP compliance analysis."
+            },
+            "OverrideCheckResponse": {
+                "properties": {
+                    "has_override": {
+                        "type": "boolean",
+                        "title": "Has Override"
+                    },
+                    "override": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/OverrideLogEntry"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "has_override"
+                ],
+                "title": "OverrideCheckResponse",
+                "description": "Response for checking if an override exists."
+            },
+            "OverrideLogEntry": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "request_id": {
+                        "type": "string",
+                        "title": "Request Id"
+                    },
+                    "repository": {
+                        "type": "string",
+                        "title": "Repository"
+                    },
+                    "pull_request_number": {
+                        "type": "integer",
+                        "title": "Pull Request Number"
+                    },
+                    "overridden_by": {
+                        "type": "string",
+                        "title": "Overridden By"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "title": "Reason"
+                    },
+                    "violations_count": {
+                        "type": "integer",
+                        "title": "Violations Count"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "request_id",
+                    "repository",
+                    "pull_request_number",
+                    "overridden_by",
+                    "reason",
+                    "violations_count",
+                    "created_at"
+                ],
+                "title": "OverrideLogEntry",
+                "description": "Override log entry schema."
+            },
+            "OverrideLogsResponse": {
+                "properties": {
+                    "entries": {
+                        "items": {
+                            "$ref": "#/components/schemas/OverrideLogEntry"
+                        },
+                        "type": "array",
+                        "title": "Entries"
+                    },
+                    "total": {
+                        "type": "integer",
+                        "title": "Total"
+                    },
+                    "page": {
+                        "type": "integer",
+                        "title": "Page"
+                    },
+                    "page_size": {
+                        "type": "integer",
+                        "title": "Page Size"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "entries",
+                    "total",
+                    "page",
+                    "page_size"
+                ],
+                "title": "OverrideLogsResponse",
+                "description": "Response for override log queries."
+            },
+            "OverrideRequest": {
+                "properties": {
+                    "repository": {
+                        "type": "string",
+                        "title": "Repository",
+                        "description": "Repository name (owner/repo)"
+                    },
+                    "pull_request_number": {
+                        "type": "integer",
+                        "title": "Pull Request Number",
+                        "description": "PR number"
+                    },
+                    "request_id": {
+                        "type": "string",
+                        "title": "Request Id",
+                        "description": "Original analysis request ID"
+                    },
+                    "overridden_by": {
+                        "type": "string",
+                        "title": "Overridden By",
+                        "description": "Username of the person overriding"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "minLength": 10,
+                        "title": "Reason",
+                        "description": "Reason for the override (min 10 characters)"
+                    },
+                    "violations_count": {
+                        "type": "integer",
+                        "minimum": 0.0,
+                        "title": "Violations Count",
+                        "description": "Number of violations being overridden",
+                        "default": 0
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "repository",
+                    "pull_request_number",
+                    "request_id",
+                    "overridden_by",
+                    "reason"
+                ],
+                "title": "OverrideRequest",
+                "description": "Request to override a blocking decision."
+            },
+            "OverrideResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "title": "Success"
+                    },
+                    "override_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Override Id"
+                    },
+                    "message": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "repository": {
+                        "type": "string",
+                        "title": "Repository"
+                    },
+                    "pull_request_number": {
+                        "type": "integer",
+                        "title": "Pull Request Number"
+                    },
+                    "overridden_by": {
+                        "type": "string",
+                        "title": "Overridden By"
+                    },
+                    "created_at": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "success",
+                    "message",
+                    "repository",
+                    "pull_request_number",
+                    "overridden_by"
+                ],
+                "title": "OverrideResponse",
+                "description": "Response from override request."
+            },
+            "RepositoryStat": {
+                "properties": {
+                    "repository": {
+                        "type": "string",
+                        "title": "Repository"
+                    },
+                    "total_analyses": {
+                        "type": "integer",
+                        "title": "Total Analyses"
+                    },
+                    "total_violations": {
+                        "type": "integer",
+                        "title": "Total Violations"
+                    },
+                    "critical_violations": {
+                        "type": "integer",
+                        "title": "Critical Violations"
+                    },
+                    "high_violations": {
+                        "type": "integer",
+                        "title": "High Violations"
+                    },
+                    "blocked_count": {
+                        "type": "integer",
+                        "title": "Blocked Count"
+                    },
+                    "block_rate": {
+                        "type": "number",
+                        "title": "Block Rate"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "repository",
+                    "total_analyses",
+                    "total_violations",
+                    "critical_violations",
+                    "high_violations",
+                    "blocked_count",
+                    "block_rate"
+                ],
+                "title": "RepositoryStat",
+                "description": "Statistics for a single repository."
+            },
+            "RepositoryStatsResponse": {
+                "properties": {
+                    "repositories": {
+                        "items": {
+                            "$ref": "#/components/schemas/RepositoryStat"
+                        },
+                        "type": "array",
+                        "title": "Repositories"
+                    },
+                    "period_days": {
+                        "type": "integer",
+                        "title": "Period Days"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "repositories",
+                    "period_days"
+                ],
+                "title": "RepositoryStatsResponse",
+                "description": "Response containing repository statistics."
+            },
+            "RulePackInfo": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    },
+                    "version": {
+                        "type": "string",
+                        "title": "Version"
+                    },
+                    "rules_count": {
+                        "type": "integer",
+                        "title": "Rules Count"
+                    },
+                    "enforcement_mode": {
+                        "type": "string",
+                        "title": "Enforcement Mode"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "version",
+                    "rules_count",
+                    "enforcement_mode"
+                ],
+                "title": "RulePackInfo",
+                "description": "Information about a rule pack."
+            },
+            "RulePacksResponse": {
+                "properties": {
+                    "packs": {
+                        "items": {
+                            "$ref": "#/components/schemas/RulePackInfo"
+                        },
+                        "type": "array",
+                        "title": "Packs"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "packs"
+                ],
+                "title": "RulePacksResponse",
+                "description": "Response listing available rule packs."
+            },
+            "SummaryStats": {
+                "properties": {
+                    "total_analyses": {
+                        "type": "integer",
+                        "title": "Total Analyses"
+                    },
+                    "total_violations": {
+                        "type": "integer",
+                        "title": "Total Violations"
+                    },
+                    "total_blocked": {
+                        "type": "integer",
+                        "title": "Total Blocked"
+                    },
+                    "block_rate": {
+                        "type": "number",
+                        "title": "Block Rate",
+                        "description": "Percentage of analyses that resulted in blocking"
+                    },
+                    "violations_by_severity": {
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "type": "object",
+                        "title": "Violations By Severity"
+                    },
+                    "period_days": {
+                        "type": "integer",
+                        "title": "Period Days"
+                    },
+                    "repository": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Repository"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "total_analyses",
+                    "total_violations",
+                    "total_blocked",
+                    "block_rate",
+                    "violations_by_severity",
+                    "period_days"
+                ],
+                "title": "SummaryStats",
+                "description": "Summary statistics for dashboard."
+            },
+            "TrendPoint": {
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "title": "Date"
+                    },
+                    "analyses": {
+                        "type": "integer",
+                        "title": "Analyses"
+                    },
+                    "violations": {
+                        "type": "integer",
+                        "title": "Violations"
+                    },
+                    "blocked": {
+                        "type": "integer",
+                        "title": "Blocked"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "date",
+                    "analyses",
+                    "violations",
+                    "blocked"
+                ],
+                "title": "TrendPoint",
+                "description": "Single data point in a trend series."
+            },
+            "TrendsResponse": {
+                "properties": {
+                    "trends": {
+                        "items": {
+                            "$ref": "#/components/schemas/TrendPoint"
+                        },
+                        "type": "array",
+                        "title": "Trends"
+                    },
+                    "interval": {
+                        "type": "string",
+                        "title": "Interval"
+                    },
+                    "periods": {
+                        "type": "integer",
+                        "title": "Periods"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "trends",
+                    "interval",
+                    "periods"
+                ],
+                "title": "TrendsResponse",
+                "description": "Response containing trend data."
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            },
+            "ViolationBreakdownResponse": {
+                "properties": {
+                    "breakdown": {
+                        "items": {
+                            "$ref": "#/components/schemas/ViolationStat"
+                        },
+                        "type": "array",
+                        "title": "Breakdown"
+                    },
+                    "group_by": {
+                        "type": "string",
+                        "title": "Group By"
+                    },
+                    "period_days": {
+                        "type": "integer",
+                        "title": "Period Days"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "breakdown",
+                    "group_by",
+                    "period_days"
+                ],
+                "title": "ViolationBreakdownResponse",
+                "description": "Response containing violation breakdown."
+            },
+            "ViolationSchema": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "title": "Type",
+                        "description": "Violation type (security, quality, license, ip, etc.)"
+                    },
+                    "severity": {
+                        "type": "string",
+                        "title": "Severity",
+                        "description": "Severity level"
+                    },
+                    "rule": {
+                        "type": "string",
+                        "title": "Rule",
+                        "description": "Rule ID that triggered the violation"
+                    },
+                    "file": {
+                        "type": "string",
+                        "title": "File",
+                        "description": "File where violation was found"
+                    },
+                    "line": {
+                        "type": "integer",
+                        "title": "Line",
+                        "description": "Line number"
+                    },
+                    "column": {
+                        "type": "integer",
+                        "title": "Column",
+                        "description": "Column number",
+                        "default": 0
+                    },
+                    "message": {
+                        "type": "string",
+                        "title": "Message",
+                        "description": "Violation message"
+                    },
+                    "suggestion": {
+                        "type": "string",
+                        "title": "Suggestion",
+                        "description": "Suggested fix",
+                        "default": ""
+                    },
+                    "code_snippet": {
+                        "type": "string",
+                        "title": "Code Snippet",
+                        "description": "Code snippet around violation",
+                        "default": ""
+                    },
+                    "cwe": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cwe",
+                        "description": "CWE identifier"
+                    },
+                    "owasp": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Owasp",
+                        "description": "OWASP category"
+                    },
+                    "license_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "License Type",
+                        "description": "License type if this is a license violation"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "type",
+                    "severity",
+                    "rule",
+                    "file",
+                    "line",
+                    "message"
+                ],
+                "title": "ViolationSchema",
+                "description": "Schema for a detected violation."
+            },
+            "ViolationStat": {
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "title": "Category"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "title": "Count"
+                    },
+                    "percentage": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Percentage"
+                    },
+                    "analyses": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Analyses"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "category",
+                    "count"
+                ],
+                "title": "ViolationStat",
+                "description": "Violation statistic by category."
+            }
+        }
+    }
+}
