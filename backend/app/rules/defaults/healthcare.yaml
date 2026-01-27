@@ -1,0 +1,133 @@
+id: healthcare
+name: Healthcare & HIPAA Rules
+description: Compliance rules for healthcare applications
+version: "1.0.0"
+enforcement_mode: blocking
+
+metadata:
+  category: compliance
+  compliance: ["HIPAA", "HITECH"]
+  industry: healthcare
+
+rules:
+  - id: hipaa-phi-exposure
+    name: PHI Exposure
+    description: Detects potential exposure of Protected Health Information
+    severity: critical
+    pattern: "(?i)(?:patient|medical|diagnosis|treatment|prescription|health)[_\\s]?(?:record|data|info|id|number)"
+    message: Potential PHI reference detected
+    suggestion: Ensure PHI is encrypted and access is logged per HIPAA requirements
+    cwe: CWE-312
+    owasp: A3:2017
+    tags: [hipaa, phi, sensitive-data]
+    metadata:
+      hipaa: "164.312(a)(1)"
+
+  - id: hipaa-medical-record-number
+    name: Medical Record Number
+    description: Detects potential MRN exposure
+    severity: critical
+    pattern: "(?i)(?:mrn|medical[_\\s]?record[_\\s]?(?:number|num|no))\\s*[:=]\\s*['\"]?\\w+"
+    message: Medical Record Number detected
+    suggestion: MRNs must be encrypted and access controlled
+    cwe: CWE-312
+    owasp: A3:2017
+    tags: [hipaa, phi]
+
+  - id: hipaa-diagnosis-code
+    name: Diagnosis Code Exposure
+    description: Detects ICD codes that may indicate health conditions
+    severity: high
+    pattern: "(?i)(?:icd[_\\-]?(?:9|10)|diagnosis[_\\s]?code)\\s*[:=]\\s*['\"]?[A-Z]?\\d+"
+    message: Diagnosis code detected in code
+    suggestion: Diagnosis codes are PHI and must be protected
+    cwe: CWE-312
+    owasp: A3:2017
+    tags: [hipaa, phi, diagnosis]
+
+  - id: hipaa-insurance-id
+    name: Insurance ID Exposure
+    description: Detects health insurance identifiers
+    severity: high
+    pattern: "(?i)(?:insurance|member|subscriber)[_\\s]?(?:id|number|num)\\s*[:=]"
+    message: Health insurance identifier detected
+    suggestion: Insurance IDs are PHI and must be protected
+    cwe: CWE-312
+    owasp: A3:2017
+    tags: [hipaa, phi, insurance]
+
+  - id: hipaa-dob
+    name: Date of Birth Exposure
+    description: DOB combined with other data can identify patients
+    severity: medium
+    pattern: "(?i)(?:date[_\\s]?of[_\\s]?birth|dob|birth[_\\s]?date)\\s*[:=]"
+    message: Date of birth field detected
+    suggestion: DOB is PHI when combined with other identifiers
+    cwe: CWE-312
+    owasp: A3:2017
+    tags: [hipaa, phi, pii]
+
+  - id: hipaa-audit-trail
+    name: PHI Access Without Audit
+    description: PHI access must be logged
+    severity: high
+    pattern: "(?i)(?:patient|phi|medical)[_\\s]?(?:data|record|info).*(?:get|fetch|read|query)(?!.*(?:log|audit))"
+    message: PHI access may lack audit logging
+    suggestion: Log all PHI access per HIPAA requirements
+    cwe: CWE-778
+    owasp: A10:2017
+    tags: [hipaa, audit, logging]
+    metadata:
+      hipaa: "164.312(b)"
+
+  - id: hipaa-encryption-rest
+    name: PHI Storage Encryption
+    description: PHI must be encrypted at rest
+    severity: critical
+    pattern: "(?i)(?:patient|phi|medical).*(?:save|store|insert|write)(?!.*(?:encrypt|cipher))"
+    message: PHI may be stored without encryption
+    suggestion: Encrypt all PHI at rest per HIPAA requirements
+    cwe: CWE-311
+    owasp: A3:2017
+    tags: [hipaa, encryption]
+    metadata:
+      hipaa: "164.312(a)(2)(iv)"
+
+  - id: hipaa-encryption-transit
+    name: PHI Transmission Encryption
+    description: PHI must be encrypted in transit
+    severity: critical
+    pattern: "http://(?!localhost|127\\.0\\.0\\.1).*(?:patient|phi|medical|health)"
+    message: PHI may be transmitted without encryption
+    suggestion: Always use HTTPS/TLS for PHI transmission
+    cwe: CWE-319
+    owasp: A3:2017
+    tags: [hipaa, encryption, transport]
+    metadata:
+      hipaa: "164.312(e)(1)"
+
+  - id: hipaa-minimum-necessary
+    name: Minimum Necessary Violation
+    description: Only necessary PHI should be accessed
+    severity: medium
+    pattern: "(?i)SELECT\\s+\\*\\s+FROM\\s+(?:patient|medical|health)"
+    message: SELECT * may retrieve more PHI than necessary
+    suggestion: Query only the specific fields needed (Minimum Necessary rule)
+    cwe: CWE-200
+    owasp: A3:2017
+    tags: [hipaa, minimum-necessary]
+    metadata:
+      hipaa: "164.502(b)"
+
+  - id: hipaa-authorization
+    name: Missing Authorization Check
+    description: PHI access requires authorization verification
+    severity: high
+    pattern: "(?i)def\\s+(?:get|fetch|read)[_\\s]?(?:patient|phi|medical).*:(?!.*(?:auth|permission|role|access))"
+    message: PHI access function may lack authorization check
+    suggestion: Verify user authorization before PHI access
+    cwe: CWE-862
+    owasp: A5:2017
+    tags: [hipaa, authorization, access-control]
+    metadata:
+      hipaa: "164.312(d)"

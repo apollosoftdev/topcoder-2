@@ -1,0 +1,105 @@
+id: banking
+name: Banking & Financial Services Rules
+description: Compliance rules for banking and financial applications
+version: "1.0.0"
+enforcement_mode: blocking
+
+metadata:
+  category: compliance
+  compliance: ["PCI-DSS", "SOX", "GLBA"]
+  industry: financial_services
+
+rules:
+  - id: bank-pci-card-number
+    name: Credit Card Number Exposure
+    description: Detects potential exposure of credit card numbers
+    severity: critical
+    pattern: "\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13})\\b"
+    message: Potential credit card number detected in code
+    suggestion: Never store or log full card numbers; use tokenization
+    cwe: CWE-312
+    owasp: A3:2017
+    tags: [pci-dss, sensitive-data, card]
+    metadata:
+      pci_dss: "3.4"
+
+  - id: bank-ssn-exposure
+    name: SSN Exposure
+    description: Detects potential exposure of Social Security Numbers
+    severity: critical
+    pattern: "\\b\\d{3}[-\\s]?\\d{2}[-\\s]?\\d{4}\\b"
+    message: Potential SSN detected in code
+    suggestion: Never store or log SSNs in plain text
+    cwe: CWE-312
+    owasp: A3:2017
+    tags: [sensitive-data, pii]
+
+  - id: bank-account-number
+    name: Account Number Exposure
+    description: Detects potential exposure of bank account numbers
+    severity: high
+    pattern: "(?i)account[_\\s]?(?:number|num|no)\\s*[:=]\\s*['\"]?\\d{8,17}['\"]?"
+    message: Potential bank account number detected
+    suggestion: Mask or encrypt account numbers
+    cwe: CWE-312
+    owasp: A3:2017
+    tags: [sensitive-data, financial]
+
+  - id: bank-routing-number
+    name: Routing Number Exposure
+    description: Detects potential exposure of bank routing numbers
+    severity: medium
+    pattern: "(?i)routing[_\\s]?(?:number|num|no)\\s*[:=]\\s*['\"]?\\d{9}['\"]?"
+    message: Potential routing number detected
+    suggestion: Consider if routing number exposure is necessary
+    cwe: CWE-312
+    owasp: A3:2017
+    tags: [sensitive-data, financial]
+
+  - id: bank-unencrypted-pii
+    name: Unencrypted PII Storage
+    description: Detects potential unencrypted PII storage
+    severity: high
+    pattern: "(?i)(?:customer|user)[_\\s]?(?:name|address|phone|email|dob|birth)\\s*[:=]"
+    message: PII may be stored without encryption
+    suggestion: Ensure all PII is encrypted at rest
+    cwe: CWE-311
+    owasp: A3:2017
+    tags: [encryption, pii]
+
+  - id: bank-audit-logging
+    name: Missing Audit Logging
+    description: Financial transactions should be logged
+    severity: medium
+    pattern: "(?i)(?:transfer|withdraw|deposit|payment)\\s*\\([^)]*\\)(?!.*log)"
+    message: Financial transaction may lack audit logging
+    suggestion: Ensure all financial transactions are logged for audit
+    cwe: CWE-778
+    owasp: A10:2017
+    tags: [audit, logging, compliance]
+    metadata:
+      sox: "302"
+
+  - id: bank-http-api
+    name: Insecure HTTP for Financial API
+    description: Financial APIs must use HTTPS
+    severity: critical
+    pattern: "http://(?!localhost|127\\.0\\.0\\.1)"
+    message: HTTP (non-HTTPS) URL detected for potentially external service
+    suggestion: Always use HTTPS for financial data transmission
+    cwe: CWE-319
+    owasp: A3:2017
+    tags: [transport, encryption]
+    metadata:
+      pci_dss: "4.1"
+
+  - id: bank-weak-auth
+    name: Weak Authentication
+    description: Detects potentially weak authentication mechanisms
+    severity: high
+    pattern: "(?i)(?:auth|login).*(?:==|===)\\s*['\"][^'\"]+['\"]"
+    message: Potential hardcoded or weak authentication
+    suggestion: Use secure authentication mechanisms with proper password hashing
+    cwe: CWE-287
+    owasp: A2:2017
+    tags: [authentication]
