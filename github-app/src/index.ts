@@ -14,12 +14,27 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Validate required environment variables
-const requiredEnvVars = ["GITHUB_APP_ID", "GITHUB_WEBHOOK_SECRET"];
+const requiredEnvVars = [
+  "GITHUB_APP_ID",
+  "GITHUB_WEBHOOK_SECRET",
+  "GITHUB_PRIVATE_KEY",
+  "BACKEND_API_URL",
+];
+
+const missingEnvVars: string[] = [];
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
-    console.error(`Missing required environment variable: ${envVar}`);
-    process.exit(1);
+    missingEnvVars.push(envVar);
   }
+}
+
+if (missingEnvVars.length > 0) {
+  console.error("Missing required environment variables:");
+  for (const envVar of missingEnvVars) {
+    console.error(`  - ${envVar}`);
+  }
+  console.error("\nPlease set these variables in your .env file or environment.");
+  process.exit(1);
 }
 
 // Initialize webhooks
