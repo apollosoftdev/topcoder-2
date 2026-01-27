@@ -2,19 +2,32 @@
 
 import hmac
 import hashlib
+import logging
 from typing import Optional
 
 from fastapi import HTTPException, Header, status
 
 from .config import get_settings
 
+logger = logging.getLogger(__name__)
+
+# Track if we've logged the API key warning to avoid spam
+_api_key_warning_logged = False
+
 
 async def verify_api_key(x_api_key: Optional[str] = Header(None)) -> bool:
     """Verify API key if configured."""
+    global _api_key_warning_logged
     settings = get_settings()
 
     if not settings.api_key:
-        # No API key configured, allow all requests
+        # No API key configured, allow all requests but warn in production
+        if not settings.debug and not _api_key_warning_logged:
+            logger.warning(
+                "API_KEY is not configured - all requests are allowed without authentication. "
+                "This is a security risk in production. Set the API_KEY environment variable."
+            )
+            _api_key_warning_logged = True
         return True
 
     if not x_api_key:
