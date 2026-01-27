@@ -1,6 +1,7 @@
 """FastAPI application entry point."""
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -20,6 +21,34 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def get_cors_origins() -> list[str]:
+    """Get CORS allowed origins from environment or use defaults.
+
+    In production, set CORS_ORIGINS environment variable to a comma-separated
+    list of allowed origins (e.g., "https://app.example.com,https://admin.example.com").
+    """
+    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+
+    if cors_origins_env:
+        origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+        logger.info(f"CORS origins configured: {origins}")
+        return origins
+
+    # Default development origins - warn in production
+    if not settings.debug:
+        logger.warning(
+            "CORS_ORIGINS not configured - using permissive defaults. "
+            "Set CORS_ORIGINS environment variable in production."
+        )
+
+    return [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+    ]
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler."""
@@ -37,12 +66,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# CORS middleware - use specific origins instead of wildcard for security
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
