@@ -121,10 +121,13 @@ export interface OverrideResult {
 export class ApiClient {
   private baseUrl: string;
   private apiKey?: string;
+  private timeoutMs: number;
 
   constructor() {
     this.baseUrl = process.env.BACKEND_API_URL || 'http://localhost:8000';
     this.apiKey = process.env.BACKEND_API_KEY;
+    // Default timeout of 30 seconds for API calls
+    this.timeoutMs = parseInt(process.env.BACKEND_API_TIMEOUT || '30000', 10);
   }
 
   async analyze(request: AnalyzeRequest): Promise<AnalysisResult> {
@@ -138,30 +141,55 @@ export class ApiClient {
       headers['X-API-Key'] = this.apiKey;
     }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(request),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`API request failed: ${response.status} ${error}`);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(request),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`API request failed: ${response.status} ${error}`);
+      }
+
+      return response.json() as Promise<AnalysisResult>;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`API request timed out after ${this.timeoutMs}ms`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json() as Promise<AnalysisResult>;
   }
 
   async getHealth(): Promise<{ status: string; version: string }> {
     const url = `${this.baseUrl}/api/v1/health`;
 
-    const response = await fetch(url);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
-    if (!response.ok) {
-      throw new Error(`Health check failed: ${response.status}`);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+
+      if (!response.ok) {
+        throw new Error(`Health check failed: ${response.status}`);
+      }
+
+      return response.json() as Promise<{ status: string; version: string }>;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`Health check timed out after ${this.timeoutMs}ms`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json() as Promise<{ status: string; version: string }>;
   }
 
   async requestOverride(request: OverrideRequest): Promise<OverrideResult> {
@@ -175,18 +203,31 @@ export class ApiClient {
       headers['X-API-Key'] = this.apiKey;
     }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(request),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Override request failed: ${response.status} ${error}`);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(request),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Override request failed: ${response.status} ${error}`);
+      }
+
+      return response.json() as Promise<OverrideResult>;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`Override request timed out after ${this.timeoutMs}ms`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json() as Promise<OverrideResult>;
   }
 
   async checkOverride(
@@ -201,12 +242,24 @@ export class ApiClient {
       headers['X-API-Key'] = this.apiKey;
     }
 
-    const response = await fetch(url, { headers });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
-    if (!response.ok) {
-      throw new Error(`Override check failed: ${response.status}`);
+    try {
+      const response = await fetch(url, { headers, signal: controller.signal });
+
+      if (!response.ok) {
+        throw new Error(`Override check failed: ${response.status}`);
+      }
+
+      return response.json() as Promise<{ has_override: boolean; override?: unknown }>;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`Override check timed out after ${this.timeoutMs}ms`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json() as Promise<{ has_override: boolean; override?: unknown }>;
   }
 }
