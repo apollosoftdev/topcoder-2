@@ -95,6 +95,30 @@ async def init_db():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Database tables initialized successfully")
+
+        # Verify database connectivity with a simple query
+        await verify_db_connection()
+
     except Exception as e:
-        logger.warning(f"Failed to initialize database: {e}")
-        logger.warning("Audit logging will be disabled")
+        logger.error(f"Failed to initialize database: {e}")
+        logger.error("Database connection is required for proper operation")
+        raise
+
+
+async def verify_db_connection() -> bool:
+    """Verify database connectivity by executing a simple query.
+
+    Returns:
+        True if connection is healthy, raises exception otherwise.
+    """
+    from sqlalchemy import text
+
+    try:
+        engine = await get_async_engine()
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        logger.info("Database health check passed")
+        return True
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        raise
