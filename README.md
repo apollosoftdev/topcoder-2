@@ -32,10 +32,10 @@ Enterprise-grade code security and compliance guardrails that integrate with Git
 │                         │                               │
 │         ┌───────────────┼───────────────┐               │
 │         ▼               ▼               ▼               │
-│   ┌──────────┐   ┌──────────┐   ┌──────────┐           │
-│   │ Anthropic│   │  Google  │   │   Groq   │           │
-│   │ (Claude) │   │ (Gemini) │   │ (Llama)  │           │
-│   └──────────┘   └──────────┘   └──────────┘           │
+│   ┌──────────┐   ┌──────────┐   ┌──────────┐            │
+│   │ Anthropic│   │  Google  │   │   Groq   │            │
+│   │ (Claude) │   │ (Gemini) │   │ (Llama)  │            │
+│   └──────────┘   └──────────┘   └──────────┘            │
 └─────────────────────────────────────────────────────────┘
                       │
               ┌───────▼───────┐
@@ -57,18 +57,21 @@ Enterprise-grade code security and compliance guardrails that integrate with Git
 ### Local Development
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd topcoder-2
    ```
 
 2. **Configure environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your credentials
    ```
 
 3. **Start with Docker Compose**
+
    ```bash
    docker-compose up -d
    ```
@@ -108,6 +111,7 @@ cd backend
 ```
 
 The test script checks:
+
 1. Environment variables configuration
 2. Service health (backend and GitHub App)
 3. Database connectivity
@@ -125,33 +129,33 @@ Test results are saved to `test-results.log` for CI/CD integration.
 
 #### Backend (Python/FastAPI)
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `ENV` | Environment: `development`, `staging`, `production` | No | `development` |
-| `DATABASE_URL` | PostgreSQL connection URL | Yes | - |
-| `AI_PROVIDER` | AI provider: `anthropic`, `gemini`, or `groq` | No | `groq` |
-| `ANTHROPIC_API_KEY` | Anthropic API key (if using Claude) | Conditional | - |
-| `GOOGLE_API_KEY` | Google API key (if using Gemini) | Conditional | - |
-| `GROQ_API_KEY` | Groq API key (if using Llama) | Conditional | - |
-| `API_KEY` | Backend API authentication key | No | - |
-| `CORS_ORIGINS` | Comma-separated allowed origins | No | localhost |
-| `CLAUDE_MODEL` | Claude model | No | `claude-sonnet-4-20250514` |
-| `GEMINI_MODEL` | Gemini model | No | `gemini-2.0-flash` |
-| `GROQ_MODEL` | Groq model | No | `llama-3.3-70b-versatile` |
-| `DEFAULT_ENFORCEMENT_MODE` | `advisory`, `warning`, or `blocking` | No | `warning` |
-| `DEBUG` | Enable debug mode | No | `false` |
-| `LOG_LEVEL` | Logging level | No | `INFO` |
+| Variable                   | Description                                         | Required    | Default                    |
+| -------------------------- | --------------------------------------------------- | ----------- | -------------------------- |
+| `ENV`                      | Environment: `development`, `staging`, `production` | No          | `development`              |
+| `DATABASE_URL`             | PostgreSQL connection URL                           | Yes         | -                          |
+| `AI_PROVIDER`              | AI provider: `anthropic`, `gemini`, or `groq`       | No          | `groq`                     |
+| `ANTHROPIC_API_KEY`        | Anthropic API key (if using Claude)                 | Conditional | -                          |
+| `GOOGLE_API_KEY`           | Google API key (if using Gemini)                    | Conditional | -                          |
+| `GROQ_API_KEY`             | Groq API key (if using Llama)                       | Conditional | -                          |
+| `API_KEY`                  | Backend API authentication key                      | No          | -                          |
+| `CORS_ORIGINS`             | Comma-separated allowed origins                     | No          | localhost                  |
+| `CLAUDE_MODEL`             | Claude model                                        | No          | `claude-sonnet-4-20250514` |
+| `GEMINI_MODEL`             | Gemini model                                        | No          | `gemini-2.0-flash`         |
+| `GROQ_MODEL`               | Groq model                                          | No          | `llama-3.3-70b-versatile`  |
+| `DEFAULT_ENFORCEMENT_MODE` | `advisory`, `warning`, or `blocking`                | No          | `warning`                  |
+| `DEBUG`                    | Enable debug mode                                   | No          | `false`                    |
+| `LOG_LEVEL`                | Logging level                                       | No          | `INFO`                     |
 
 #### GitHub App (TypeScript)
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GITHUB_APP_ID` | GitHub App ID | Yes |
-| `GITHUB_PRIVATE_KEY` | GitHub App private key (PEM format) | Yes |
-| `GITHUB_WEBHOOK_SECRET` | Webhook secret for signature verification | Yes |
-| `BACKEND_API_URL` | URL where backend is accessible | Yes |
-| `BACKEND_API_KEY` | API key for backend authentication | No |
-| `BACKEND_API_TIMEOUT` | Request timeout in milliseconds | No | `30000` |
+| Variable                | Description                               | Required |
+| ----------------------- | ----------------------------------------- | -------- | ------- |
+| `GITHUB_APP_ID`         | GitHub App ID                             | Yes      |
+| `GITHUB_PRIVATE_KEY`    | GitHub App private key (PEM format)       | Yes      |
+| `GITHUB_WEBHOOK_SECRET` | Webhook secret for signature verification | Yes      |
+| `BACKEND_API_URL`       | URL where backend is accessible           | Yes      |
+| `BACKEND_API_KEY`       | API key for backend authentication        | No       |
+| `BACKEND_API_TIMEOUT`   | Request timeout in milliseconds           | No       | `30000` |
 
 #### Production Configuration
 
@@ -168,6 +172,7 @@ LOG_LEVEL=WARNING
 ```
 
 **Security Notes:**
+
 - In production (`ENV=production`), warnings are logged if `CORS_ORIGINS` or `API_KEY` are not configured
 - The backend validates database connectivity on startup and fails fast if unavailable
 - The GitHub App validates all required environment variables at startup
@@ -199,6 +204,7 @@ LOG_LEVEL=WARNING
 Analyze code changes for security violations.
 
 **Request:**
+
 ```json
 {
   "repository": "owner/repo",
@@ -215,6 +221,7 @@ Analyze code changes for security violations.
 ```
 
 **Response:**
+
 ```json
 {
   "request_id": "uuid",
@@ -250,6 +257,7 @@ Analyze code changes for security violations.
 Retrieve audit logs with pagination.
 
 **Query Parameters:**
+
 - `repository` (optional): Filter by repository
 - `page` (default: 1): Page number
 - `page_size` (default: 50): Items per page
@@ -263,6 +271,7 @@ List available rule packs.
 Health check endpoint.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -284,18 +293,20 @@ Get aggregated statistics for the dashboard.
 
 The system supports multiple AI providers for code review. Configure via the `AI_PROVIDER` environment variable.
 
-| Provider | Variable | Models | Best For |
-|----------|----------|--------|----------|
-| **Groq** (default) | `AI_PROVIDER=groq` | Llama 3.3 70B | Fast responses, cost-effective |
-| **Anthropic** | `AI_PROVIDER=anthropic` | Claude Sonnet | High accuracy, nuanced analysis |
-| **Google** | `AI_PROVIDER=gemini` | Gemini 2.0 Flash | Balanced speed and quality |
+| Provider           | Variable                | Models           | Best For                        |
+| ------------------ | ----------------------- | ---------------- | ------------------------------- |
+| **Groq** (default) | `AI_PROVIDER=groq`      | Llama 3.3 70B    | Fast responses, cost-effective  |
+| **Anthropic**      | `AI_PROVIDER=anthropic` | Claude Sonnet    | High accuracy, nuanced analysis |
+| **Google**         | `AI_PROVIDER=gemini`    | Gemini 2.0 Flash | Balanced speed and quality      |
 
 Each provider requires its respective API key to be set.
 
 ## Rule Packs
 
 ### Security (Default)
+
 General security rules based on OWASP Top 10:
+
 - Hardcoded secrets and credentials
 - SQL injection patterns
 - Command injection
@@ -304,7 +315,9 @@ General security rules based on OWASP Top 10:
 - Weak cryptography
 
 ### Banking
+
 PCI-DSS, SOX, and GLBA compliance:
+
 - Credit card number exposure
 - SSN detection
 - Bank account/routing number exposure
@@ -312,7 +325,9 @@ PCI-DSS, SOX, and GLBA compliance:
 - Missing audit logging
 
 ### Healthcare
+
 HIPAA and HITECH compliance:
+
 - PHI exposure detection
 - Medical record number handling
 - Diagnosis code protection
@@ -321,11 +336,11 @@ HIPAA and HITECH compliance:
 
 ## Enforcement Modes
 
-| Mode | Behavior |
-|------|----------|
-| `advisory` | Comments only, no blocking |
-| `warning` | Annotations + alerts, check status neutral |
-| `blocking` | Prevents merge via failed check run |
+| Mode       | Behavior                                   |
+| ---------- | ------------------------------------------ |
+| `advisory` | Comments only, no blocking                 |
+| `warning`  | Annotations + alerts, check status neutral |
+| `blocking` | Prevents merge via failed check run        |
 
 ## Deployment
 
@@ -349,17 +364,17 @@ Helm charts coming soon.
 
 ## Security Patterns Detected
 
-| Pattern | Severity | CWE |
-|---------|----------|-----|
-| Hardcoded API Key | Critical | CWE-798 |
-| Hardcoded Password | Critical | CWE-798 |
-| SQL Injection | High | CWE-89 |
-| Command Injection | High | CWE-78 |
-| XSS (innerHTML) | Medium | CWE-79 |
-| Insecure Deserialization | High | CWE-502 |
-| Weak Hash (MD5/SHA1) | Medium | CWE-328 |
-| Insecure Random | Medium | CWE-330 |
-| Private Key Exposure | Critical | CWE-321 |
+| Pattern                  | Severity | CWE     |
+| ------------------------ | -------- | ------- |
+| Hardcoded API Key        | Critical | CWE-798 |
+| Hardcoded Password       | Critical | CWE-798 |
+| SQL Injection            | High     | CWE-89  |
+| Command Injection        | High     | CWE-78  |
+| XSS (innerHTML)          | Medium   | CWE-79  |
+| Insecure Deserialization | High     | CWE-502 |
+| Weak Hash (MD5/SHA1)     | Medium   | CWE-328 |
+| Insecure Random          | Medium   | CWE-330 |
+| Private Key Exposure     | Critical | CWE-321 |
 
 ## Project Structure
 
