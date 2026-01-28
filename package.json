@@ -8,6 +8,10 @@
   "workspaces": [
     "github-app"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apollosoftdev/topcoder-2.git"
+  },
   "scripts": {
     "install:all": "npm install && cd backend && pip install -r requirements.txt",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:github-app\"",
