@@ -106,7 +106,7 @@ export async function handlePullRequest(event: PullRequestEvent): Promise<void> 
 
     console.log(`PR #${prNumber} analysis complete: ${checkConclusion}`);
   } catch (error) {
-    console.error(`Error processing PR #${prNumber}:`, error);
+    console.error('Error processing PR #%d: %O', prNumber, error);
 
     // Try to update check run to indicate failure
     try {
@@ -150,7 +150,7 @@ async function postViolationComments(
         violation.line
       );
     } catch (error) {
-      console.error(`Failed to post comment for ${violation.file}:${violation.line}:`, error);
+      console.error('Failed to post comment for %s:%d: %O', violation.file, violation.line, error);
     }
   }
 }

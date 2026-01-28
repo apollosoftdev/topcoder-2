@@ -71,7 +71,7 @@ export async function handlePush(event: PushEvent): Promise<void> {
       await createSecurityIssue(github, repository, after, result);
     }
   } catch (error) {
-    console.error(`Error processing push to ${branch}:`, error);
+    console.error('Error processing push to %s: %O', branch, error);
   }
 }
 

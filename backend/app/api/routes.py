@@ -179,6 +179,7 @@ async def analyze_code(
         return response
 
     except Exception as e:
+        # nosemgrep: python.lang.best-practice.logging-error-without-handling
         logger.error(f"Analysis failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

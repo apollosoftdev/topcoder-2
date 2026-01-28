@@ -137,7 +137,7 @@ export async function handleIssueComment(event: IssueCommentEvent): Promise<void
       );
     }
   } catch (error) {
-    console.error(`Error processing override for PR #${prNumber}:`, error);
+    console.error('Error processing override for PR #%d: %O', prNumber, error);
 
     try {
       await github.createIssueComment(

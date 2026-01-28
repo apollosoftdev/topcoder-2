@@ -241,7 +241,7 @@ export class GitHubService {
       const allowedPermissions = ['write', 'maintain', 'admin'];
       return allowedPermissions.includes(response.data.permission);
     } catch (error) {
-      console.error(`Failed to get permission for ${username}:`, error);
+      console.error('Failed to get permission for %s: %O', username, error);
       return false;
     }
   }

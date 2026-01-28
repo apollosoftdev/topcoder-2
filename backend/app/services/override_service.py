@@ -140,8 +140,9 @@ class OverrideService:
                 if repository:
                     query = query.where(OverrideLog.repository == repository)
 
-                # Get total count
-                count_query = select(OverrideLog)
+                # Get total count using SQL COUNT (more efficient than fetching all)
+                from sqlalchemy import func
+                count_query = select(func.count()).select_from(OverrideLog)
                 if repository:
                     count_query = count_query.where(OverrideLog.repository == repository)
 
@@ -153,7 +154,7 @@ class OverrideService:
                 entries = result.scalars().all()
 
                 count_result = await session.execute(count_query)
-                total = len(count_result.scalars().all())
+                total = count_result.scalar() or 0
 
                 return {
                     "entries": [

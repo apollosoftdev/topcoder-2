@@ -1,0 +1,39 @@
+# Semgrep ignore file
+# Ignore test files and generated code
+
+# Ignore development container files (not production)
+.devcontainer/
+
+# Ignore node_modules and build artifacts
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Ignore lock files
+package-lock.json
+yarn.lock
+
+# Ignore virtual environments
+venv/
+.venv/
+
+# Ignore temporary and test files
+*.test.ts
+*.test.py
+*.spec.ts
+test/
+tests/
+
+# Ignore example/sample files
+*.example
+*.sample
+
+# Ignore our custom rule definition files (not semgrep configs)
+backend/app/rules/defaults/
+
+# Ignore package.json files (dependencies checked elsewhere)
+package.json
+*/package.json

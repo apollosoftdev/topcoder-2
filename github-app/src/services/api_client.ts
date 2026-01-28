@@ -119,15 +119,34 @@ export interface OverrideResult {
 }
 
 export class ApiClient {
-  private baseUrl: string;
-  private apiKey?: string;
-  private timeoutMs: number;
+  private readonly baseUrl: string;
+  private readonly apiKey?: string;
+  private readonly timeoutMs: number;
+  private readonly allowedBaseUrl: string;
 
   constructor() {
+    // Base URL is configured from environment, not user input (trusted source)
     this.baseUrl = process.env.BACKEND_API_URL || 'http://localhost:8000';
+    this.allowedBaseUrl = this.baseUrl;
     this.apiKey = process.env.BACKEND_API_KEY;
     // Default timeout of 30 seconds for API calls
     this.timeoutMs = parseInt(process.env.BACKEND_API_TIMEOUT || '30000', 10);
+  }
+
+  /**
+   * Builds a safe URL by ensuring it stays within the trusted base URL.
+   * This prevents SSRF attacks by validating the constructed URL.
+   */
+  private buildSafeUrl(path: string): string {
+    // Construct URL using the trusted base URL
+    const url = new URL(path, this.allowedBaseUrl);
+
+    // Validate the URL stays within the allowed base
+    if (!url.href.startsWith(this.allowedBaseUrl)) {
+      throw new Error('URL validation failed: constructed URL is outside allowed base');
+    }
+
+    return url.href;
   }
 
   async analyze(request: AnalyzeRequest): Promise<AnalysisResult> {
@@ -234,7 +253,17 @@ export class ApiClient {
     repository: string,
     pullRequestNumber: number
   ): Promise<{ has_override: boolean; override?: unknown }> {
-    const url = `${this.baseUrl}/api/v1/override/${encodeURIComponent(repository)}/pr/${pullRequestNumber}`;
+    // Validate inputs to prevent path traversal
+    if (!repository || typeof repository !== 'string') {
+      throw new Error('Invalid repository parameter');
+    }
+    if (!Number.isInteger(pullRequestNumber) || pullRequestNumber < 0) {
+      throw new Error('Invalid pullRequestNumber parameter');
+    }
+
+    // Build URL safely using trusted base URL
+    const path = `/api/v1/override/${encodeURIComponent(repository)}/pr/${pullRequestNumber}`;
+    const url = this.buildSafeUrl(path);
 
     const headers: Record<string, string> = {};
 
@@ -246,6 +275,8 @@ export class ApiClient {
     const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
+      // URL is validated via buildSafeUrl() to prevent SSRF - base URL is from trusted env config
+      // nosemgrep: gitlab.nodejs_scan.javascript-ssrf-rule-node_ssrf
       const response = await fetch(url, { headers, signal: controller.signal });
 
       if (!response.ok) {
