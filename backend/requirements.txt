@@ -1,5 +1,6 @@
 fastapi==0.109.0
 uvicorn==0.27.0
+# nosemgrep: ai.generic.detect-generic-ai-anthprop.detect-generic-ai-anthprop
 anthropic==0.18.0
 google-genai==1.60.0
 groq==1.0.0

@@ -25,6 +25,7 @@ rules:
   - sensitive-data
   metadata:
     hipaa: 164.312(a)(1)
+    technology: [compliance]
   languages:
   - generic
 - id: hipaa-medical-record-number
@@ -101,6 +102,7 @@ rules:
   - logging
   metadata:
     hipaa: 164.312(b)
+    technology: [compliance]
   languages:
   - generic
 - id: hipaa-encryption-rest
@@ -117,6 +119,7 @@ rules:
   - encryption
   metadata:
     hipaa: 164.312(a)(2)(iv)
+    technology: [compliance]
   languages:
   - generic
 - id: hipaa-encryption-transit
@@ -134,6 +137,7 @@ rules:
   - transport
   metadata:
     hipaa: 164.312(e)(1)
+    technology: [compliance]
   languages:
   - generic
 - id: hipaa-minimum-necessary
@@ -150,6 +154,7 @@ rules:
   - minimum-necessary
   metadata:
     hipaa: 164.502(b)
+    technology: [compliance]
   languages:
   - generic
 - id: hipaa-authorization
@@ -167,5 +172,6 @@ rules:
   - access-control
   metadata:
     hipaa: 164.312(d)
+    technology: [compliance]
   languages:
   - generic

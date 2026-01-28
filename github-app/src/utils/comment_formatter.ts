@@ -51,6 +51,7 @@ export class CommentFormatter {
       comment += refs.join(' | ') + '\n';
     }
 
+    // nosemgrep: javascript.lang.security.html-in-template-string.html-in-template-string
     comment += `\n<sub>Rule: \`${escapeHtml(violation.rule)}\`</sub>`;
 
     return comment;

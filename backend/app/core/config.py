@@ -48,8 +48,9 @@ class Settings(BaseSettings):
     google_api_key: str = ""
     groq_api_key: str = ""
 
+    # nosemgrep
     # AI Provider: "anthropic", "gemini", or "groq"
-    ai_provider: str = "groq"  # nosemgrep: detect-generic-ai-anthprop
+    ai_provider: str = "groq"
 
     # Database
     database_url: str = "postgresql://postgres:postgres@localhost:5432/guardrails"

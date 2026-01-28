@@ -26,6 +26,7 @@ rules:
   - card
   metadata:
     pci_dss: '3.4'
+    technology: [compliance]
   languages:
   - generic
 - id: bank-ssn-exposure
@@ -99,6 +100,7 @@ rules:
   - compliance
   metadata:
     sox: '302'
+    technology: [compliance]
   languages:
   - generic
 - id: bank-http-api
@@ -115,6 +117,7 @@ rules:
   - encryption
   metadata:
     pci_dss: '4.1'
+    technology: [compliance]
   languages:
   - generic
 - id: bank-weak-auth

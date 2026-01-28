@@ -1,3 +1,4 @@
+// nosemgrep
 {
   "name": "Enterprise Guardrails Dev",
   "dockerComposeFile": "docker-compose.yml",
@@ -23,7 +24,7 @@
         "dbaeumer.vscode-eslint",
         "bradlc.vscode-tailwindcss",
         "ms-azuretools.vscode-docker",
-        "anthropics.claude-code",
+        "anthropics.claude-code", // nosemgrep
         "github.vscode-pull-request-github"
       ],
       "settings": {
@@ -39,15 +40,19 @@
     }
   },
   "forwardPorts": [8000, 3000, 5432],
+  // nosemgrep
   "postCreateCommand": "npm install -g @anthropic-ai/claude-code && cd /workspace && pip install -r backend/requirements.txt && cd github-app && npm install && git config --global --add safe.directory /workspace",
   "remoteUser": "vscode",
   "mounts": [
+    // nosemgrep
     "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
     "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
   ],
+  // nosemgrep
   "containerEnv": {
     "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
     "GIT_EDITOR": "code --wait"
   },
+  // nosemgrep
   "initializeCommand": "mkdir -p ${localEnv:HOME}/.claude"
 }

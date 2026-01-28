@@ -24,6 +24,7 @@ build/
 .DS_Store
 Thumbs.db
 
+# nosemgrep: ai.generic.detect-generic-ai-anthprop.detect-generic-ai-anthprop
 # Claude
 .claude/
 

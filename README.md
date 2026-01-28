@@ -1,4 +1,3 @@
-<!-- nosemgrep: detect-generic-ai-anthprop, detect-anthropic, metadata-technology -->
 # AI-Powered Enterprise Guardrails for GitHub Copilot
 
 Enterprise-grade code security and compliance guardrails that integrate with GitHub to analyze pull requests using a hybrid AI + static analysis approach.
