@@ -51,7 +51,7 @@ export class CommentFormatter {
       comment += refs.join(' | ') + '\n';
     }
 
-    comment += `\n<sub>Rule: \`${violation.rule}\`</sub>`;
+    comment += `\n<sub>Rule: \`${escapeHtml(violation.rule)}\`</sub>`;
 
     return comment;
   }
