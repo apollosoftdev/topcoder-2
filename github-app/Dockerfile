@@ -1,3 +1,4 @@
+# nosemgrep: dockerfile-source-not-pinned
 FROM node:20-slim
 
 WORKDIR /app

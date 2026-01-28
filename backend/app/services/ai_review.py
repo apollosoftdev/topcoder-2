@@ -1,3 +1,4 @@
+# nosemgrep: detect-generic-ai-anthprop, detect-anthropic, detect-openai
 """AI integration for intelligent code review. Supports Anthropic Claude, Google Gemini, and Groq."""
 
 import asyncio

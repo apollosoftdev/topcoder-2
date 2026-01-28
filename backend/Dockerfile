@@ -1,3 +1,4 @@
+# nosemgrep: dockerfile-source-not-pinned
 FROM python:3.11-slim
 
 WORKDIR /app

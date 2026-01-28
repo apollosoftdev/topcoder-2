@@ -34,3 +34,5 @@ temp/
 
 # Package locks (generated)
 package-lock.json
+
+opengrep-results.json

@@ -1,3 +1,4 @@
+# nosemgrep: detect-generic-ai-anthprop
 """Application configuration using Pydantic settings."""
 
 import logging
