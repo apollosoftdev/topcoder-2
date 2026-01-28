@@ -13,25 +13,27 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Validate required environment variables
-const requiredEnvVars = [
-  "GITHUB_APP_ID",
-  "GITHUB_WEBHOOK_SECRET",
-  "GITHUB_PRIVATE_KEY",
-  "BACKEND_API_URL",
-];
-
+// Validate required environment variables using explicit checks
+// to avoid object injection vulnerabilities from bracket notation
 const missingEnvVars: string[] = [];
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    missingEnvVars.push(envVar);
-  }
+
+if (!process.env.GITHUB_APP_ID) {
+  missingEnvVars.push("GITHUB_APP_ID");
+}
+if (!process.env.GITHUB_WEBHOOK_SECRET) {
+  missingEnvVars.push("GITHUB_WEBHOOK_SECRET");
+}
+if (!process.env.GITHUB_PRIVATE_KEY) {
+  missingEnvVars.push("GITHUB_PRIVATE_KEY");
+}
+if (!process.env.BACKEND_API_URL) {
+  missingEnvVars.push("BACKEND_API_URL");
 }
 
 if (missingEnvVars.length > 0) {
   console.error("Missing required environment variables:");
   for (const envVar of missingEnvVars) {
-    console.error(`  - ${envVar}`);
+    console.error("  - %s", envVar);
   }
   console.error("\nPlease set these variables in your .env file or environment.");
   process.exit(1);

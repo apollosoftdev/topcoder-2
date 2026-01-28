@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
 COPY package*.json ./
 
 # Install all dependencies (including devDependencies for build)
-RUN npm install
+RUN npm install && npm cache clean --force
 
 # Copy source code
 COPY . .

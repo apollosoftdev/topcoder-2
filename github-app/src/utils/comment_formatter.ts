@@ -9,6 +9,20 @@ interface CheckAnnotation {
   title?: string;
 }
 
+/**
+ * Escapes HTML entities to prevent XSS in generated content.
+ */
+function escapeHtml(text: string): string {
+  const htmlEntities: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
+}
+
 export class CommentFormatter {
   formatInlineComment(violation: Violation): string {
     const severityEmoji = this.getSeverityEmoji(violation.severity);
@@ -63,7 +77,7 @@ export class CommentFormatter {
       for (const violation of result.violations.slice(0, 20)) {
         const emoji = this.getSeverityEmoji(violation.severity);
         comment += `<details>\n`;
-        comment += `<summary>${emoji} <b>${violation.file}:${violation.line}</b> - ${violation.message}</summary>\n\n`;
+        comment += `<summary>${emoji} <b>${escapeHtml(violation.file)}:${violation.line}</b> - ${escapeHtml(violation.message)}</summary>\n\n`;
         comment += `- **Rule:** \`${violation.rule}\`\n`;
         comment += `- **Severity:** ${violation.severity}\n`;
         if (violation.suggestion) {

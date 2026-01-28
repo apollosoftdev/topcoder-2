@@ -96,7 +96,7 @@ class RuleEngine:
 
     def _load_rule_pack(self, filepath: Path) -> RulePack:
         """Load a rule pack from a YAML file."""
-        with open(filepath) as f:
+        with open(filepath, encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         rules = []
