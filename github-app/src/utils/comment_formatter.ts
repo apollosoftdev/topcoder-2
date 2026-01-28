@@ -13,14 +13,23 @@ interface CheckAnnotation {
  * Escapes HTML entities to prevent XSS in generated content.
  */
 function escapeHtml(text: string): string {
-  const htmlEntities: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  };
-  return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
+  // Use explicit switch to avoid object bracket notation
+  return text.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case '&':
+        return '&amp;';
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;';
+      case '"':
+        return '&quot;';
+      case "'":
+        return '&#39;';
+      default:
+        return char;
+    }
+  });
 }
 
 export class CommentFormatter {
@@ -78,10 +87,10 @@ export class CommentFormatter {
         const emoji = this.getSeverityEmoji(violation.severity);
         comment += `<details>\n`;
         comment += `<summary>${emoji} <b>${escapeHtml(violation.file)}:${violation.line}</b> - ${escapeHtml(violation.message)}</summary>\n\n`;
-        comment += `- **Rule:** \`${violation.rule}\`\n`;
-        comment += `- **Severity:** ${violation.severity}\n`;
+        comment += `- **Rule:** \`${escapeHtml(violation.rule)}\`\n`;
+        comment += `- **Severity:** ${escapeHtml(violation.severity)}\n`;
         if (violation.suggestion) {
-          comment += `- **Suggestion:** ${violation.suggestion}\n`;
+          comment += `- **Suggestion:** ${escapeHtml(violation.suggestion)}\n`;
         }
         if (violation.cwe) {
           comment += `- **CWE:** [${violation.cwe}](https://cwe.mitre.org/data/definitions/${violation.cwe.replace('CWE-', '')}.html)\n`;

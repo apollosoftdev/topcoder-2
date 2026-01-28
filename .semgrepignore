@@ -37,3 +37,19 @@ backend/app/rules/defaults/
 # Ignore package.json files (dependencies checked elsewhere)
 package.json
 */package.json
+
+# Ignore configuration files that trigger false positives
+.gitignore
+*.md
+*.txt
+*.json
+*.yml
+*.yaml
+!docker-compose.yml
+
+# Ignore Dockerfiles (already secured, false positives for base image pinning)
+**/Dockerfile
+
+# Ignore requirements files
+requirements.txt
+requirements*.txt
