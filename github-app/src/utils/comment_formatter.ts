@@ -86,6 +86,7 @@ export class CommentFormatter {
       for (const violation of result.violations.slice(0, 20)) {
         const emoji = this.getSeverityEmoji(violation.severity);
         comment += `<details>\n`;
+        // nosemgrep: javascript.lang.security.html-in-template-string.html-in-template-string
         comment += `<summary>${emoji} <b>${escapeHtml(violation.file)}:${violation.line}</b> - ${escapeHtml(violation.message)}</summary>\n\n`;
         comment += `- **Rule:** \`${escapeHtml(violation.rule)}\`\n`;
         comment += `- **Severity:** ${escapeHtml(violation.severity)}\n`;

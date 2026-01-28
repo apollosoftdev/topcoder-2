@@ -1,101 +1,122 @@
 id: security
 name: Security Rules
 description: General security rules for all applications
-version: "1.0.0"
+version: 1.0.0
 enforcement_mode: warning
-
 metadata:
   category: security
-  compliance: ["OWASP", "CWE"]
-
+  compliance:
+  - OWASP
+  - CWE
 rules:
-  - id: sec-hardcoded-secret
-    name: Hardcoded Secret
-    description: Detects hardcoded secrets, API keys, passwords, and tokens
-    severity: critical
-    pattern: "(?i)(api[_-]?key|password|passwd|secret|token|private[_-]?key)\\s*[:=]\\s*['\"][^'\"]{8,}['\"]"
-    message: Hardcoded credential detected
-    suggestion: Use environment variables or a secrets manager
-    cwe: CWE-798
-    owasp: A3:2017
-    tags: [secrets, credentials]
-
-  - id: sec-sql-injection
-    name: SQL Injection
-    description: Detects potential SQL injection vulnerabilities
-    severity: high
-    pattern: "(?:execute|query)\\s*\\([^)]*(?:\\+|\\.format|\\{)"
-    message: Potential SQL injection vulnerability
-    suggestion: Use parameterized queries
-    cwe: CWE-89
-    owasp: A1:2017
-    tags: [injection, database]
-
-  - id: sec-command-injection
-    name: Command Injection
-    description: Detects potential command injection vulnerabilities
-    severity: high
-    pattern: "(?:os\\.system|subprocess\\.call|eval)\\s*\\([^)]*(?:request|input|user)"
-    message: Potential command injection vulnerability
-    suggestion: Validate and sanitize user input; avoid shell=True
-    cwe: CWE-78
-    owasp: A1:2017
-    tags: [injection, shell]
-
-  - id: sec-xss
-    name: Cross-Site Scripting (XSS)
-    description: Detects potential XSS vulnerabilities
-    severity: high
-    pattern: "(?:innerHTML|document\\.write)\\s*="
-    message: Potential XSS vulnerability
-    suggestion: Use textContent or sanitize HTML input
-    cwe: CWE-79
-    owasp: A7:2017
-    languages: [javascript, typescript]
-    tags: [xss, web]
-
-  - id: sec-insecure-deserialization
-    name: Insecure Deserialization
-    description: Detects use of insecure deserialization methods
-    severity: high
-    pattern: "pickle\\.loads?\\s*\\("
-    message: Insecure deserialization detected
-    suggestion: Use safe serialization formats like JSON
-    cwe: CWE-502
-    owasp: A8:2017
-    languages: [python]
-    tags: [deserialization]
-
-  - id: sec-weak-crypto
-    name: Weak Cryptography
-    description: Detects use of weak cryptographic algorithms
-    severity: medium
-    pattern: "(?:md5|sha1)\\s*\\("
-    message: Weak cryptographic algorithm detected
-    suggestion: Use SHA-256 or stronger algorithms
-    cwe: CWE-328
-    owasp: A3:2017
-    tags: [crypto]
-
-  - id: sec-insecure-random
-    name: Insecure Random
-    description: Detects use of non-cryptographic random for security
-    severity: medium
-    pattern: "\\brandom\\.(?:random|randint|choice)\\s*\\("
-    message: Non-cryptographic random used
-    suggestion: Use secrets module for security-sensitive values
-    cwe: CWE-330
-    owasp: A3:2017
-    languages: [python]
-    tags: [crypto, random]
-
-  - id: sec-debug-enabled
-    name: Debug Mode
-    description: Detects debug mode enabled in code
-    severity: low
-    pattern: "(?:DEBUG|debug)\\s*[:=]\\s*(?:True|true|1)"
-    message: Debug mode appears to be enabled
-    suggestion: Ensure debug mode is disabled in production
-    cwe: CWE-489
-    owasp: A6:2017
-    tags: [config, debug]
+- id: sec-hardcoded-secret
+  name: Hardcoded Secret
+  description: Detects hardcoded secrets, API keys, passwords, and tokens
+  severity: critical
+  pattern: (?i)(api[_-]?key|password|passwd|secret|token|private[_-]?key)\s*[:=]\s*['"][^'"]{8,}['"]
+  message: Hardcoded credential detected
+  suggestion: Use environment variables or a secrets manager
+  cwe: CWE-798
+  owasp: A3:2017
+  tags:
+  - secrets
+  - credentials
+  languages:
+  - generic
+- id: sec-sql-injection
+  name: SQL Injection
+  description: Detects potential SQL injection vulnerabilities
+  severity: high
+  pattern: (?:execute|query)\s*\([^)]*(?:\+|\.format|\{)
+  message: Potential SQL injection vulnerability
+  suggestion: Use parameterized queries
+  cwe: CWE-89
+  owasp: A1:2017
+  tags:
+  - injection
+  - database
+  languages:
+  - generic
+- id: sec-command-injection
+  name: Command Injection
+  description: Detects potential command injection vulnerabilities
+  severity: high
+  pattern: (?:os\.system|subprocess\.call|eval)\s*\([^)]*(?:request|input|user)
+  message: Potential command injection vulnerability
+  suggestion: Validate and sanitize user input; avoid shell=True
+  cwe: CWE-78
+  owasp: A1:2017
+  tags:
+  - injection
+  - shell
+  languages:
+  - generic
+- id: sec-xss
+  name: Cross-Site Scripting (XSS)
+  description: Detects potential XSS vulnerabilities
+  severity: high
+  pattern: (?:innerHTML|document\.write)\s*=
+  message: Potential XSS vulnerability
+  suggestion: Use textContent or sanitize HTML input
+  cwe: CWE-79
+  owasp: A7:2017
+  languages:
+  - javascript
+  - typescript
+  tags:
+  - xss
+  - web
+- id: sec-insecure-deserialization
+  name: Insecure Deserialization
+  description: Detects use of insecure deserialization methods
+  severity: high
+  pattern: pickle\.loads?\s*\(
+  message: Insecure deserialization detected
+  suggestion: Use safe serialization formats like JSON
+  cwe: CWE-502
+  owasp: A8:2017
+  languages:
+  - python
+  tags:
+  - deserialization
+- id: sec-weak-crypto
+  name: Weak Cryptography
+  description: Detects use of weak cryptographic algorithms
+  severity: medium
+  pattern: (?:md5|sha1)\s*\(
+  message: Weak cryptographic algorithm detected
+  suggestion: Use SHA-256 or stronger algorithms
+  cwe: CWE-328
+  owasp: A3:2017
+  tags:
+  - crypto
+  languages:
+  - generic
+- id: sec-insecure-random
+  name: Insecure Random
+  description: Detects use of non-cryptographic random for security
+  severity: medium
+  pattern: \brandom\.(?:random|randint|choice)\s*\(
+  message: Non-cryptographic random used
+  suggestion: Use secrets module for security-sensitive values
+  cwe: CWE-330
+  owasp: A3:2017
+  languages:
+  - python
+  tags:
+  - crypto
+  - random
+- id: sec-debug-enabled
+  name: Debug Mode
+  description: Detects debug mode enabled in code
+  severity: low
+  pattern: (?:DEBUG|debug)\s*[:=]\s*(?:True|true|1)
+  message: Debug mode appears to be enabled
+  suggestion: Ensure debug mode is disabled in production
+  cwe: CWE-489
+  owasp: A6:2017
+  tags:
+  - config
+  - debug
+  languages:
+  - generic

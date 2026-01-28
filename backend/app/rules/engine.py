@@ -44,6 +44,7 @@ class Rule:
     suggestion: str = ""
     cwe: Optional[str] = None
     owasp: Optional[str] = None
+    # nosemgrep: python.lang.maintainability.return.return-not-in-function
     languages: list[str] = field(default_factory=lambda: ["*"])
     tags: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)

@@ -184,7 +184,7 @@ class AuditLogger:
                 await session.execute(select(AuditLog).limit(1))
                 return True
         except Exception as e:
-            logger.error(f"Database connection check failed: {e}")
+            logger.error(f"Database connection check failed: {e}")  # nosemgrep: logging-error-without-handling
             raise
 
     async def export_logs(

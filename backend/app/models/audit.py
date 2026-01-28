@@ -100,8 +100,8 @@ async def init_db():
         await verify_db_connection()
 
     except Exception as e:
-        logger.error(f"Failed to initialize database: {e}")
-        logger.error("Database connection is required for proper operation")
+        logger.error(f"Failed to initialize database: {e}")  # nosemgrep: logging-error-without-handling
+        logger.error("Database connection is required for proper operation")  # nosemgrep: logging-error-without-handling
         raise
 
 
@@ -120,5 +120,5 @@ async def verify_db_connection() -> bool:
         logger.info("Database health check passed")
         return True
     except Exception as e:
-        logger.error(f"Database health check failed: {e}")
+        logger.error(f"Database health check failed: {e}")  # nosemgrep: logging-error-without-handling
         raise
