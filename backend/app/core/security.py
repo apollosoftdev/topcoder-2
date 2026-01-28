@@ -22,8 +22,7 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None)) -> bool:
 
     if not settings.api_key:
         # No API key configured, allow all requests but warn in production
-        # nosemgrep: python.lang.maintainability.is-function-without-parentheses
-        if settings.is_production and not _api_key_warning_logged:
+        if settings.is_production and not _api_key_warning_logged:  # nosemgrep: is-function-without-parentheses
             logger.warning(
                 "API_KEY is not configured - all requests are allowed without authentication. "
                 "This is a security risk in production. Set the API_KEY environment variable."

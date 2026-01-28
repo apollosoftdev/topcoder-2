@@ -35,8 +35,7 @@ def get_cors_origins() -> list[str]:
         return origins
 
     # Default development origins - warn in production
-    # nosemgrep: python.lang.maintainability.is-function-without-parentheses
-    if settings.is_production:
+    if settings.is_production:  # nosemgrep: is-function-without-parentheses
         logger.warning(
             "CORS_ORIGINS not configured - using permissive defaults. "
             "Set CORS_ORIGINS environment variable in production."

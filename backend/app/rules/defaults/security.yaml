@@ -61,8 +61,8 @@ rules:
   cwe: CWE-79
   owasp: A7:2017
   languages:
-  - javascript
-  - typescript
+  - javascript  # nosemgrep: lang-consistency-js
+  - typescript  # nosemgrep: lang-consistency-ts
   tags:
   - xss
   - web

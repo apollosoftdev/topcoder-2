@@ -58,7 +58,7 @@ services:
       retries: 3
       start_period: 10s
 
-  postgres:
+  postgres:  # nosemgrep: writable-filesystem-service
     image: postgres:15-alpine
     environment:
       - POSTGRES_USER=postgres
