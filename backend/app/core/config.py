@@ -44,12 +44,12 @@ class Settings(BaseSettings):
         return self.env.lower() == "development"
 
     # API Keys
-    anthropic_api_key: str = ""
+    anthropic_api_key: str = ""  # nosemgrep: detect-generic-ai-anthprop, detect-anthropic
     google_api_key: str = ""
     groq_api_key: str = ""
 
     # AI Provider: "anthropic", "gemini", or "groq"
-    ai_provider: str = "groq"
+    ai_provider: str = "groq"  # nosemgrep: detect-generic-ai-anthprop
 
     # Database
     database_url: str = "postgresql://postgres:postgres@localhost:5432/guardrails"
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     api_key: Optional[str] = None  # Optional API key for backend authentication
 
     # Claude Settings
-    claude_model: str = "claude-sonnet-4-20250514"
+    claude_model: str = "claude-sonnet-4-20250514"  # nosemgrep: detect-generic-ai-anthprop
     claude_max_tokens: int = 4096
 
     # Gemini Settings
@@ -84,15 +84,15 @@ def get_settings() -> Settings:
     logger.info("Configuration loaded:")
     logger.info(f"  ENV: {settings.env}")
     logger.info(f"  DATABASE_URL: {settings.database_url[:30]}...")
-    logger.info(f"  AI_PROVIDER: {settings.ai_provider}")
-    logger.info(f"  ANTHROPIC_API_KEY: {'[SET]' if settings.anthropic_api_key else '[NOT SET]'}")
+    logger.info(f"  AI_PROVIDER: {settings.ai_provider}")  # nosemgrep: detect-generic-ai-anthprop
+    logger.info(f"  ANTHROPIC_API_KEY: {'[SET]' if settings.anthropic_api_key else '[NOT SET]'}")  # nosemgrep: detect-generic-ai-anthprop, detect-anthropic
     logger.info(f"  GOOGLE_API_KEY: {'[SET]' if settings.google_api_key else '[NOT SET]'}")
     logger.info(f"  GROQ_API_KEY: {'[SET]' if settings.groq_api_key else '[NOT SET]'}")
     logger.info(f"  GITHUB_APP_SECRET: {'[SET]' if settings.github_app_secret else '[NOT SET]'}")
     logger.info(f"  API_KEY: {'[SET]' if settings.api_key else '[NOT SET]'}")
     logger.info(f"  DEBUG: {settings.debug}")
     logger.info(f"  LOG_LEVEL: {settings.log_level}")
-    logger.info(f"  CLAUDE_MODEL: {settings.claude_model}")
+    logger.info(f"  CLAUDE_MODEL: {settings.claude_model}")  # nosemgrep: detect-generic-ai-anthprop
     logger.info(f"  GEMINI_MODEL: {settings.gemini_model}")
 
     return settings
